@@ -230,7 +230,7 @@ $filtered = array_values($filtered);
                     <div class="card">
                         <div class="card-img" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); display: flex; align-items: center; justify-content: center; color: #888; font-size: 48px; min-height: 200px; overflow: hidden;">
                             <?php if (!empty($car['image'])): ?>
-                                <img src="<?= BASE_URL ?><?= htmlspecialchars($car['image']) ?>" alt="<?= htmlspecialchars($car['brand'] . ' ' . $car['model_name']) ?>" style="width:100%; height:100%; object-fit:cover;">
+                                <img src="<?= ASSET_URL ?><?= htmlspecialchars($car['image']) ?>" alt="<?= htmlspecialchars($car['brand'] . ' ' . $car['model_name']) ?>" style="width:100%; height:100%; object-fit:cover;">
                             <?php else: ?>
                                 🚗
                             <?php endif; ?>

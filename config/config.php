@@ -8,6 +8,7 @@
 define('APP_NAME',  'CarGo');
 define('APP_ROOT',  dirname(__DIR__));
 define('BASE_URL',  '/CarGo/public/index.php');
+define('ASSET_URL', '/CarGo/');
 define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 define('VIEW_PATH', ROOT_PATH . 'app' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
 

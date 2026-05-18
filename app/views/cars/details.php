@@ -4,8 +4,8 @@
 
 // ✅ SAFE IMAGE
 $image = !empty($car['image'])
-    ? BASE_URL . $car['image']
-    : BASE_URL . 'assets/images/default-car.jpg';
+    ? ASSET_URL . $car['image']
+    : ASSET_URL . 'assets/images/default-car.jpg';
 ?>
 
 <style>
