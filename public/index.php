@@ -1,8 +1,5 @@
 <?php
-// =============================================
-// Entry Point & Router
-// Path: C:\xampp\htdocs\CarGo\public\index.php
-// =============================================
+
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once dirname(__DIR__) . '/config/config.php';
 require_once APP_ROOT . '/app/helper/MfaHelper.php';
@@ -52,6 +49,9 @@ $routes = [
     'admin-clients'        => ['controller' => 'AdminController',     'method' => 'clients'],
     'admin-payments'       => ['controller' => 'AdminController',     'method' => 'payments'],
     'admin-messages'       => ['controller' => 'AdminController',     'method' => 'messages'],
+    'admin-message-read'   => ['controller' => 'AdminController',     'method' => 'messageRead'],
+    'admin-message-delete' => ['controller' => 'AdminController',     'method' => 'messageDelete'],
+    'admin-message-reply'  => ['controller' => 'AdminController',     'method' => 'messageReply'],
 ];
 
 if (isset($routes[$page])) {

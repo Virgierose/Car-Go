@@ -4,15 +4,6 @@ $activePage = 'payments';
 ob_start();
 ?>
 
-<div class="red-rule"></div>
-
-<div class="page-header">
-    <div>
-        <h2 class="page-title-main">Payments</h2>
-        <p class="page-subtitle">Revenue & transaction records</p>
-    </div>
-</div>
-
 <!-- SUMMARY CARDS -->
 <div class="stats-grid mini-stats">
     <div class="stat-card">
@@ -140,7 +131,7 @@ ob_start();
 .filter-input { background:var(--bg); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px 9px 34px; font-size:.85rem; min-width:220px; }
 .filter-input.date-input { padding-left:14px; min-width:150px; }
 .filter-input:focus { outline:none; border-color:var(--red); }
-.filter-select { background:var(--bg); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px; font-size:.85rem; }
+.filter-select { background:var(--black-card); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px; font-size:.85rem; }
 .record-count { color:var(--silver); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; }
 .id-badge { color:var(--red); font-weight:600; }
 .link-red { color:var(--red); text-decoration:none; font-weight:600; }
@@ -158,8 +149,3 @@ ob_start();
 .btn-ghost { background:transparent; color:var(--silver); border:1px solid transparent; padding:9px 14px; border-radius:7px; font-size:.85rem; cursor:pointer; text-decoration:none; transition:all .2s; }
 .btn-ghost:hover { color:var(--white); border-color:var(--border); }
 </style>
-
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../../layouts/admin_layout.php';
-?>

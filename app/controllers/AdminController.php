@@ -454,13 +454,181 @@ class AdminController {
     public function messages() {
         $this->requireAdmin();
         
+        // Get all messages with proper column aliases
         $result = $this->db->query("
-            SELECT * FROM tbl_contact 
+            SELECT 
+                contact_id as message_id,
+                name as sender_name,
+                email,
+                subject,
+                message,
+                is_read,
+                contact_dateAdded as created_at
+            FROM tbl_contact 
             ORDER BY contact_dateAdded DESC
         ");
         $messages = $result->fetch_all(MYSQLI_ASSOC);
 
-        renderAdmin('admin/messages/index', compact('messages'));
+        // Get unread count
+        $unreadResult = $this->db->query("SELECT COUNT(*) as count FROM tbl_contact WHERE is_read = 0");
+        $unreadRow = $unreadResult->fetch_assoc();
+        $unreadCount = $unreadRow['count'] ?? 0;
+
+        // Get specific message if ID is provided
+        $currentMessage = null;
+        if (!empty($_GET['id'])) {
+            $msgId = (int)$_GET['id'];
+            $msgResult = $this->db->prepare("
+                SELECT 
+                    contact_id as message_id,
+                    name as sender_name,
+                    email,
+                    subject,
+                    message,
+                    is_read,
+                    contact_dateAdded as created_at
+                FROM tbl_contact 
+                WHERE contact_id = ?
+            ");
+            $msgResult->bind_param('i', $msgId);
+            $msgResult->execute();
+            $currentMessage = $msgResult->get_result()->fetch_assoc();
+
+            // Mark as read
+            if ($currentMessage && !$currentMessage['is_read']) {
+                $this->db->query("UPDATE tbl_contact SET is_read = 1 WHERE contact_id = {$msgId}");
+            }
+        }
+
+        renderAdmin('admin/messages/index', compact('messages', 'unreadCount', 'currentMessage'));
+    }
+
+    // ─────────────────────────────────────────
+    //  GET MESSAGE (AJAX)
+    // ─────────────────────────────────────────
+    public function messageRead() {
+        $this->requireAdmin();
+        
+        $msgId = (int)($_GET['id'] ?? 0);
+        if (!$msgId) {
+            http_response_code(400);
+            die(json_encode(['error' => 'Invalid message ID']));
+        }
+
+        $msgResult = $this->db->prepare("
+            SELECT 
+                contact_id as message_id,
+                name as sender_name,
+                email,
+                subject,
+                message,
+                is_read,
+                contact_dateAdded as created_at
+            FROM tbl_contact 
+            WHERE contact_id = ?
+        ");
+        $msgResult->bind_param('i', $msgId);
+        $msgResult->execute();
+        $currentMessage = $msgResult->get_result()->fetch_assoc();
+
+        if (!$currentMessage) {
+            http_response_code(404);
+            die(json_encode(['error' => 'Message not found']));
+        }
+
+        // Mark as read
+        if (!$currentMessage['is_read']) {
+            $this->db->query("UPDATE tbl_contact SET is_read = 1 WHERE contact_id = {$msgId}");
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($currentMessage);
+        exit;
+    }
+
+    // ─────────────────────────────────────────
+    //  DELETE MESSAGE
+    // ─────────────────────────────────────────
+    public function messageDelete() {
+        $this->requireAdmin();
+        
+        $msgId = (int)($_POST['id'] ?? $_GET['id'] ?? 0);
+        if (!$msgId) {
+            $_SESSION['error'] = 'Invalid message ID';
+            header('Location: ' . BASE_URL . '?page=admin-messages');
+            exit;
+        }
+
+        $stmt = $this->db->prepare("DELETE FROM tbl_contact WHERE contact_id = ?");
+        $stmt->bind_param('i', $msgId);
+        
+        if ($stmt->execute()) {
+            $_SESSION['success'] = 'Message deleted successfully';
+        } else {
+            $_SESSION['error'] = 'Failed to delete message';
+        }
+
+        header('Location: ' . BASE_URL . '?page=admin-messages');
+        exit;
+    }
+
+    // ─────────────────────────────────────────
+    //  REPLY TO MESSAGE (EMAIL)
+    // ─────────────────────────────────────────
+    public function messageReply() {
+        $this->requireAdmin();
+        
+        $msgId = (int)($_POST['id'] ?? 0);
+        $replyMessage = trim($_POST['reply_message'] ?? '');
+
+        if (!$msgId || empty($replyMessage)) {
+            $_SESSION['error'] = 'Invalid reply data';
+            header('Location: ' . BASE_URL . '?page=admin-messages&id=' . $msgId);
+            exit;
+        }
+
+        // Get original message
+        $msgResult = $this->db->prepare("SELECT email, sender_name, subject FROM tbl_contact WHERE contact_id = ?");
+        $msgResult->bind_param('i', $msgId);
+        $msgResult->execute();
+        $message = $msgResult->get_result()->fetch_assoc();
+
+        if (!$message) {
+            $_SESSION['error'] = 'Message not found';
+            header('Location: ' . BASE_URL . '?page=admin-messages');
+            exit;
+        }
+
+        // Send email reply
+        require_once APP_ROOT . '/vendor/autoload.php';
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = getenv('SMTP_USER') ?: 'your-email@gmail.com';
+            $mail->Password = getenv('SMTP_PASS') ?: 'your-app-password';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('noreply@cargo.com', 'CARGO Admin');
+            $mail->addReplyTo($message['email'], $message['sender_name']);
+            $mail->addAddress($message['email']);
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Re: ' . $message['subject'];
+            $mail->Body = nl2br(htmlspecialchars($replyMessage));
+            $mail->AltBody = htmlspecialchars($replyMessage);
+
+            $mail->send();
+            $_SESSION['success'] = 'Reply sent successfully';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Failed to send reply: ' . $e->getMessage();
+        }
+
+        header('Location: ' . BASE_URL . '?page=admin-messages&id=' . $msgId);
+        exit;
     }
 
     // ─────────────────────────────────────────

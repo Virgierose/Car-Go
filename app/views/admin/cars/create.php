@@ -8,16 +8,6 @@ $errors = $errors ?? [];
 $old = $old ?? [];
 ?>
 
-<div class="red-rule"></div>
-
-<div class="page-header">
-    <div>
-        <h2 class="page-title-main">Add New Car</h2>
-        <p class="page-subtitle">Register a vehicle to the fleet</p>
-    </div>
-    <a href="/admin/cars" class="btn btn-outline btn-icon"><i class="fas fa-arrow-left"></i> Back to Fleet</a>
-</div>
-
 <div class="form-card">
     <?php if ($error): ?>
         <div class="alert alert-error">
@@ -92,13 +82,13 @@ $old = $old ?? [];
 .page-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; }
 .page-title-main { font-size:1.6rem; font-weight:700; color:var(--white); letter-spacing:.04em; margin:0; }
 .page-subtitle { color:var(--silver); font-size:.8rem; margin:4px 0 0; letter-spacing:.12em; text-transform:uppercase; }
-.form-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:32px; max-width:900px; }
+.form-card { background:var(--black-card); border:1px solid var(--border); border-radius:12px; padding:32px; max-width:900px; }
 .form-section-label { color:var(--red); font-size:.75rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px; }
 .form-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-bottom:24px; }
 .form-group { display:flex; flex-direction:column; gap:6px; }
 .form-label { color:var(--silver); font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
 .req { color:var(--red); }
-.form-input, .form-select { background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:11px 14px; font-size:.9rem; width:100%; box-sizing:border-box; transition:border-color .2s; }
+.form-input, .form-select { background:var(--black-card); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:11px 14px; font-size:.9rem; width:100%; box-sizing:border-box; transition:border-color .2s; }
 .form-input:focus, .form-select:focus { outline:none; border-color:var(--red); }
 .form-divider { border:none; border-top:1px solid var(--border); margin:8px 0 24px; }
 .form-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:28px; }
@@ -127,8 +117,3 @@ function previewImage(input) {
     }
 }
 </script>
-
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../../layouts/admin_layout.php';
-?>

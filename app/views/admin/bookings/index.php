@@ -4,15 +4,6 @@ $activePage = 'bookings';
 ob_start();
 ?>
 
-<div class="red-rule"></div>
-
-<div class="page-header">
-    <div>
-        <h2 class="page-title-main">Bookings</h2>
-        <p class="page-subtitle">All rental transactions</p>
-    </div>
-</div>
-
 <!-- STATUS TABS -->
 <div class="tab-bar">
     <?php
@@ -131,7 +122,7 @@ ob_start();
 .btn-edit { background:rgba(255,255,255,.07); color:var(--silver); }
 .btn-edit:hover { background:rgba(255,255,255,.15); color:var(--white); }
 .status-dropdown-wrap { position:relative; }
-.status-dropdown { display:none; position:absolute; right:0; top:36px; background:var(--card-bg); border:1px solid var(--border); border-radius:8px; min-width:130px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,.4); overflow:hidden; }
+.status-dropdown { display:none; position:absolute; right:0; top:36px; background:var(--black-card); border:1px solid var(--border); border-radius:8px; min-width:130px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,.4); overflow:hidden; }
 .status-dropdown.open { display:block; }
 .dd-item { display:block; width:100%; text-align:left; background:none; border:none; color:var(--silver); padding:10px 16px; font-size:.82rem; cursor:pointer; transition:all .15s; }
 .dd-item:hover { background:rgba(255,255,255,.07); color:var(--white); }
@@ -153,8 +144,3 @@ document.addEventListener('click', e => {
     }
 });
 </script>
-
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../../layouts/admin_layout.php';
-?>

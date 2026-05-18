@@ -123,7 +123,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            width: calc(100% - 260px); /* FIX: prevent overflow gap */
+            width: calc(100% - 260px);
         }
 
         /* ── TOPBAR ── */
@@ -162,7 +162,7 @@
         }
 
         /* ── CONTENT ── */
-        .content { flex: 1; padding: 24px 32px; } /* FIX: reduced top padding from 32px to 24px */
+        .content { flex: 1; padding: 20px 24px; }
 
         /* ── CARDS / STATS ── */
         .stats-grid {

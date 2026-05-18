@@ -4,19 +4,6 @@ $activePage = 'cars';
 ob_start();
 ?>
 
-<div class="red-rule"></div>
-
-<!-- PAGE HEADER -->
-<div class="page-header">
-    <div>
-        <h2 class="page-title-main">Manage Cars</h2>
-        <p class="page-subtitle">Fleet vehicle inventory</p>
-    </div>
-    <div class="header-actions">
-        <a href="<?= BASE_URL ?>?page=admin-cars-create" class="btn btn-primary btn-icon"><i class="fas fa-plus"></i> Add New Car</a>
-    </div>
-</div>
-
 <!-- FILTER BAR -->
 <div class="filter-bar">
     <form method="GET" action="<?= BASE_URL ?>?page=admin-cars" class="filter-form">
@@ -92,17 +79,13 @@ ob_start();
 </div>
 
 <style>
-.page-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; }
-.page-title-main { font-size:1.6rem; font-weight:700; color:var(--white); letter-spacing:.04em; margin:0; }
-.page-subtitle { color:var(--silver); font-size:.8rem; margin:4px 0 0; letter-spacing:.12em; text-transform:uppercase; }
-.header-actions { display:flex; gap:10px; }
-.filter-bar { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:20px; }
+.filter-bar { background:var(--black-card); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:20px; }
 .filter-form { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 .filter-group { position:relative; display:flex; align-items:center; }
 .filter-icon { position:absolute; left:12px; color:var(--silver); font-size:.8rem; }
-.filter-input { background:var(--bg); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px 9px 34px; font-size:.85rem; min-width:260px; }
+.filter-input { background:var(--black-card); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px 9px 34px; font-size:.85rem; min-width:260px; }
 .filter-input:focus { outline:none; border-color:var(--red); }
-.filter-select { background:var(--bg); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px; font-size:.85rem; }
+.filter-select { background:var(--black-card); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px; font-size:.85rem; }
 .filter-select:focus { outline:none; border-color:var(--red); }
 .record-count { color:var(--silver); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; }
 .id-badge { color:var(--red); font-weight:600; }
@@ -120,8 +103,3 @@ ob_start();
 .btn-ghost { background:transparent; color:var(--silver); border:1px solid transparent; padding:9px 14px; border-radius:7px; font-size:.85rem; cursor:pointer; text-decoration:none; transition:all .2s; }
 .btn-ghost:hover { color:var(--white); border-color:var(--border); }
 </style>
-
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../../layouts/admin_layout.php';
-?>

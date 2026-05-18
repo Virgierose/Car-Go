@@ -4,18 +4,6 @@ $activePage = 'messages';
 ob_start();
 ?>
 
-<div class="red-rule"></div>
-
-<div class="page-header">
-    <div>
-        <h2 class="page-title-main">Messages</h2>
-        <p class="page-subtitle">Client inquiries & contact submissions</p>
-    </div>
-    <?php if (!empty($unreadCount) && $unreadCount > 0): ?>
-        <span class="unread-badge"><?= $unreadCount ?> unread</span>
-    <?php endif; ?>
-</div>
-
 <div class="messages-layout">
     <!-- MESSAGE LIST -->
     <div class="message-list-panel">
@@ -29,8 +17,9 @@ ob_start();
         <div class="message-list" id="messageList">
         <?php if (!empty($messages)): ?>
             <?php foreach ($messages as $m): ?>
-            <a href="/admin/messages/<?= $m['message_id'] ?>"
+            <a href="#" onclick="loadMessage(<?= $m['message_id'] ?>, event)"
                class="message-item <?= !$m['is_read'] ? 'unread' : '' ?> <?= (isset($_GET['id']) && $_GET['id'] == $m['message_id']) ? 'active' : '' ?>"
+               data-id="<?= $m['message_id'] ?>"
                data-read="<?= $m['is_read'] ? '1' : '0' ?>">
                 <div class="msg-avatar"><?= strtoupper(substr($m['sender_name'] ?? 'U', 0, 1)) ?></div>
                 <div class="msg-info">
@@ -66,21 +55,29 @@ ob_start();
                 </div>
             </div>
             <div class="msg-view-actions">
-                <form method="POST" action="/admin/messages/<?= $currentMessage['message_id'] ?>/delete" onsubmit="return confirm('Delete this message?')">
-                    <?php if (function_exists('csrf_field')) echo csrf_field(); ?>
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="btn-action btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                </form>
+                <button type="button" class="btn-action btn-reply" onclick="toggleReplyForm()" title="Reply"><i class="fas fa-reply"></i></button>
+                <button type="button" class="btn-action btn-delete" onclick="deleteMessage(<?= $currentMessage['message_id'] ?>)" title="Delete"><i class="fas fa-trash"></i></button>
             </div>
         </div>
         <div class="msg-view-body">
             <?= nl2br(htmlspecialchars($currentMessage['message'] ?? '')) ?>
         </div>
-        <?php if (!empty($currentMessage['phone'])): ?>
-            <div class="msg-view-contact">
-                <i class="fas fa-phone"></i> <?= htmlspecialchars($currentMessage['phone']) ?>
-            </div>
-        <?php endif; ?>
+
+        <!-- REPLY FORM -->
+        <div id="replyForm" class="msg-reply-form" style="display:none;">
+            <form method="POST" action="<?= BASE_URL ?>?page=admin-message-reply" onsubmit="submitReply(event, <?= $currentMessage['message_id'] ?>)">
+                <?php if (function_exists('csrf_field')) echo csrf_field(); ?>
+                <input type="hidden" name="id" value="<?= $currentMessage['message_id'] ?>">
+                <div class="form-group">
+                    <label class="form-label">Your Reply</label>
+                    <textarea name="reply_message" class="reply-textarea" placeholder="Type your reply here..." required></textarea>
+                </div>
+                <div class="reply-actions">
+                    <button type="submit" class="btn-reply-send"><i class="fas fa-paper-plane"></i> Send Reply</button>
+                    <button type="button" class="btn-reply-cancel" onclick="toggleReplyForm()"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </form>
+        </div>
     <?php else: ?>
         <div class="msg-empty-state">
             <i class="fas fa-envelope-open-text"></i>
@@ -88,15 +85,12 @@ ob_start();
         </div>
     <?php endif; ?>
     </div>
+
 </div>
 
 <style>
-.page-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; }
-.page-title-main { font-size:1.6rem; font-weight:700; color:var(--white); letter-spacing:.04em; margin:0; }
-.page-subtitle { color:var(--silver); font-size:.8rem; margin:4px 0 0; letter-spacing:.12em; text-transform:uppercase; }
-.unread-badge { background:var(--red); color:var(--white); padding:5px 12px; border-radius:20px; font-size:.78rem; font-weight:700; }
 .messages-layout { display:grid; grid-template-columns:340px 1fr; gap:16px; height:calc(100vh - 240px); min-height:500px; }
-.message-list-panel { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
+.message-list-panel { background:var(--black-card); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
 .panel-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
 .panel-title { color:var(--white); font-weight:700; font-size:.9rem; letter-spacing:.06em; text-transform:uppercase; }
 .inbox-tabs { display:flex; gap:4px; }
@@ -118,7 +112,7 @@ ob_start();
 .message-item:not(.unread) .msg-subject { color:var(--silver); font-weight:400; }
 .msg-preview { color:var(--silver); font-size:.76rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.7; }
 .unread-dot { width:8px; height:8px; border-radius:50%; background:var(--red); flex-shrink:0; margin-top:6px; }
-.message-view-panel { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
+.message-view-panel { background:var(--black-card); border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; overflow:hidden; }
 .msg-view-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start; }
 .msg-view-subject { color:var(--white); font-size:1.1rem; font-weight:700; margin-bottom:6px; }
 .msg-view-meta { color:var(--silver); font-size:.82rem; }
@@ -134,19 +128,118 @@ ob_start();
 .btn-delete { background:rgba(255,255,255,.07); color:var(--silver); }
 .btn-delete:hover { background:#c0392b; color:var(--white); }
 .msg-view-actions { display:flex; gap:8px; }
+.btn-reply { background:rgba(255,255,255,.07); color:var(--silver); }
+.btn-reply:hover { background:rgba(76,175,80,.3); color:#4ade80; }
+.msg-reply-form { padding:20px 24px; border-top:1px solid var(--border); background:rgba(0,0,0,.2); }
+.form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+.form-label { font-size:.75rem; letter-spacing:1px; text-transform:uppercase; color:var(--silver); font-weight:600; }
+.reply-textarea { background:rgba(0,0,0,.4); border:1px solid var(--border); border-radius:6px; padding:10px 12px; color:var(--white); font-family:'Barlow', sans-serif; font-size:.85rem; resize:vertical; height:100px; outline:none; transition:border-color .2s; }
+.reply-textarea:focus { border-color:var(--red); }
+.reply-textarea::placeholder { color:var(--silver); opacity:.5; }
+.reply-actions { display:flex; gap:8px; }
+.btn-reply-send { display:inline-flex; align-items:center; gap:6px; background:var(--red); color:var(--white); padding:8px 16px; border:none; border-radius:6px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; }
+.btn-reply-send:hover { background:#a00816; }
+.btn-reply-cancel { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.07); color:var(--silver); padding:8px 16px; border:none; border-radius:6px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; }
+.btn-reply-cancel:hover { background:rgba(255,255,255,.12); color:var(--white); }
 </style>
 <script>
-function filterMsg(type, btn) {
-    document.querySelectorAll('.inbox-tab').forEach(t => t.classList.remove('inbox-tab-active'));
-    btn.classList.add('inbox-tab-active');
-    document.querySelectorAll('.message-item').forEach(item => {
-        if (type === 'unread') {
-            item.style.display = item.dataset.read === '0' ? '' : 'none';
-        } else {
-            item.style.display = '';
-        }
+function loadMessage(msgId, event) {
+    event.preventDefault();
+    
+    // Mark the item as active
+    document.querySelectorAll('.message-item').forEach(item => item.classList.remove('active'));
+    document.querySelector('[data-id="' + msgId + '"]').classList.add('active');
+    
+    // Fetch message via AJAX
+    fetch('<?= BASE_URL ?>?page=admin-message-read&id=' + msgId)
+        .then(res => res.json())
+        .then(msg => {
+            const viewPanel = document.querySelector('.message-view-panel');
+            const messageHTML = `
+                <div class="msg-view-header">
+                    <div>
+                        <div class="msg-view-subject">${escapeHtml(msg.subject || '(No subject)')}</div>
+                        <div class="msg-view-meta">
+                            From: <strong>${escapeHtml(msg.sender_name || '')}</strong>
+                            &lt;${escapeHtml(msg.email || '')}&gt;
+                            &nbsp;·&nbsp; ${msg.created_at}
+                        </div>
+                    </div>
+                    <div class="msg-view-actions">
+                        <button type="button" class="btn-action btn-reply" onclick="toggleReplyForm()" title="Reply"><i class="fas fa-reply"></i></button>
+                        <button type="button" class="btn-action btn-delete" onclick="deleteMessage(${msg.message_id})" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="msg-view-body">${msg.message.replace(/\n/g, '<br>')}</div>
+                <div id="replyForm" class="msg-reply-form" style="display:none;">
+                    <form method="POST" action="<?= BASE_URL ?>?page=admin-message-reply" onsubmit="submitReply(event, ${msg.message_id})">
+                        <div class="form-group">
+                            <label class="form-label">Your Reply</label>
+                            <textarea name="reply_message" class="reply-textarea" placeholder="Type your reply here..." required></textarea>
+                        </div>
+                        <div class="reply-actions">
+                            <button type="submit" class="btn-reply-send"><i class="fas fa-paper-plane"></i> Send Reply</button>
+                            <button type="button" class="btn-reply-cancel" onclick="toggleReplyForm()"><i class="fas fa-times"></i> Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            viewPanel.innerHTML = messageHTML;
+            document.getElementById('replyForm').style.display = 'none';
+        })
+        .catch(err => {
+            console.error('Error loading message:', err);
+            alert('Failed to load message');
+        });
+}
+
+function toggleReplyForm() {
+    const form = document.getElementById('replyForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function deleteMessage(msgId) {
+    if (!confirm('Delete this message?')) return;
+    
+    fetch('<?= BASE_URL ?>?page=admin-message-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + msgId
+    })
+    .then(() => {
+        location.reload();
+    })
+    .catch(err => {
+        console.error('Error deleting message:', err);
+        alert('Failed to delete message');
     });
 }
+
+function submitReply(event, msgId) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    fetch('<?= BASE_URL ?>?page=admin-message-reply', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.text())
+    .then(() => {
+        alert('Reply sent successfully!');
+        toggleReplyForm();
+    })
+    .catch(err => {
+        console.error('Error sending reply:', err);
+        alert('Failed to send reply');
+    });
+}
+
+function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 </script>
 
 <?php

@@ -53,9 +53,10 @@ $router->post('/admin/cars/status', 'AdminController', 'carStatus');
 $router->post('/admin/cars/delete', 'AdminController', 'carDelete');
 
 // Admin Messages
-$router->get('/admin/messages',        'AdminController', 'messages');
-$router->get('/admin/messages/read',   'AdminController', 'messageRead');
-$router->post('/admin/messages/delete','AdminController', 'messageDelete');
+$router->get('/admin/messages',         'AdminController', 'messages');
+$router->get('/admin/messages/read',    'AdminController', 'messageRead');
+$router->post('/admin/messages/delete', 'AdminController', 'messageDelete');
+$router->post('/admin/messages/reply',  'AdminController', 'messageReply');
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTE: After successful login + MFA verification, users are redirected based
 // on their role via MfaController::finaliseLogin():

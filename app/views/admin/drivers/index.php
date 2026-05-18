@@ -4,16 +4,6 @@ $activePage = 'drivers';
 ob_start();
 ?>
 
-<div class="red-rule"></div>
-
-<div class="page-header">
-    <div>
-        <h2 class="page-title-main">Drivers</h2>
-        <p class="page-subtitle">Registered driver pool</p>
-    </div>
-    <a href="<?= BASE_URL ?>?page=admin-drivers-create" class="btn btn-primary btn-icon"><i class="fas fa-plus"></i> Add Driver</a>
-</div>
-
 <!-- FILTER BAR -->
 <div class="filter-bar">
     <form method="GET" action="<?= BASE_URL ?>?page=admin-drivers" class="filter-form">
@@ -105,7 +95,7 @@ ob_start();
 .filter-icon { position:absolute; left:12px; color:var(--silver); font-size:.8rem; }
 .filter-input { background:var(--bg); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px 9px 34px; font-size:.85rem; min-width:280px; }
 .filter-input:focus { outline:none; border-color:var(--red); }
-.filter-select { background:var(--bg); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px; font-size:.85rem; }
+.filter-select { background:var(--black-card); border:1px solid var(--border); border-radius:7px; color:var(--white); padding:9px 14px; font-size:.85rem; }
 .record-count { color:var(--silver); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; }
 .id-badge { color:var(--red); font-weight:600; }
 .name-cell { display:flex; align-items:center; gap:12px; }
@@ -125,8 +115,3 @@ ob_start();
 .btn-ghost { background:transparent; color:var(--silver); border:1px solid transparent; padding:9px 14px; border-radius:7px; font-size:.85rem; cursor:pointer; text-decoration:none; transition:all .2s; }
 .btn-ghost:hover { color:var(--white); border-color:var(--border); }
 </style>
-
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../../layouts/admin_layout.php';
-?>
