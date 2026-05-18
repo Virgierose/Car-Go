@@ -19,7 +19,7 @@
     align-items: flex-end;
     overflow: hidden;
     background: linear-gradient(to right, rgba(0,0,0,.82) 0%, rgba(0,0,0,.60) 100%),
-      url('https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1600&q=80') center/cover no-repeat;
+      url('assets/img/aboutB.png') center/cover no-repeat;
     margin-top: 72px; /* offset fixed header */
   }
 
