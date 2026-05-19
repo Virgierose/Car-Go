@@ -64,15 +64,20 @@ class Car {
 
     // ── Create new car ────────────────────────────────────────────────────────
     public function create(array $data): bool {
-        $sql  = "INSERT INTO tbl_car (model_id, plate_number, color, year, status)
-                 VALUES (?, ?, ?, ?, ?)";
+        $sql  = "INSERT INTO tbl_car (model_id, plate_number, color, year, transmission, fuel_type, seats, engine, daily_rate, status)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param(
-            'issss',
+            'ississsds',
             $data['model_id'],
             $data['plate_number'],
             $data['color'],
             $data['year'],
+            $data['transmission'] ?? 'Automatic',
+            $data['fuel_type'] ?? 'Gasoline',
+            $data['seats'] ?? 5,
+            $data['engine'] ?? '',
+            $data['daily_rate'] ?? 0,
             $data['status']
         );
         return $stmt->execute();
@@ -81,15 +86,20 @@ class Car {
     // ── Update car ────────────────────────────────────────────────────────────
     public function update(int $id, array $data): bool {
         $sql  = "UPDATE tbl_car 
-                 SET model_id=?, plate_number=?, color=?, year=?, status=?
+                 SET model_id=?, plate_number=?, color=?, year=?, transmission=?, fuel_type=?, seats=?, engine=?, daily_rate=?, status=?
                  WHERE car_id=?";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param(
-            'issssi',
+            'ississsdssi',
             $data['model_id'],
             $data['plate_number'],
             $data['color'],
             $data['year'],
+            $data['transmission'] ?? 'Automatic',
+            $data['fuel_type'] ?? 'Gasoline',
+            $data['seats'] ?? 5,
+            $data['engine'] ?? '',
+            $data['daily_rate'] ?? 0,
             $data['status'],
             $id
         );

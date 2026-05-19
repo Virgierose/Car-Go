@@ -18,6 +18,7 @@ ob_start();
     <form method="POST" action="<?= BASE_URL ?>?page=admin-cars-update" enctype="multipart/form-data">
         <?php if (function_exists('csrf_field')) echo csrf_field(); ?>
         <input type="hidden" name="_method" value="PUT">
+        <input type="hidden" name="car_id" value="<?= htmlspecialchars($car['car_id'] ?? '') ?>">
 
         <div class="form-section-label">Vehicle Information</div>
         <div class="form-grid">
@@ -55,6 +56,10 @@ ob_start();
                     <option value="<?= $ft ?>" <?= ($car['fuel_type'] ?? '') === $ft ? 'selected' : '' ?>><?= $ft ?></option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Engine</label>
+                <input type="text" name="engine" class="form-input" placeholder="e.g., 2.0L" value="<?= htmlspecialchars($car['engine'] ?? '') ?>">
             </div>
             <div class="form-group">
                 <label class="form-label">Seats</label>

@@ -56,7 +56,8 @@
         <p>&copy; <?= date('Y') ?> <?= APP_NAME ?> Car Rentals. All rights reserved.</p>
     </div>
 </footer>
-
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/CARGO/assets/js/main.js"></script>
 </body>
 </html>

@@ -122,6 +122,11 @@ class AdminController {
         $year         = (int)($_POST['year'] ?? 0);
         $color        = trim($_POST['color'] ?? '');
         $status       = $_POST['status'] ?? 'available';
+        $transmission = $_POST['transmission'] ?? 'Automatic';
+        $fuel_type    = $_POST['fuel_type'] ?? 'Gasoline';
+        $seats        = (int)($_POST['seats'] ?? 5);
+        $engine       = trim($_POST['engine'] ?? '');
+        $daily_rate   = (float)($_POST['daily_rate'] ?? 0);
 
         $errors = [];
         if (empty($brand)) $errors[] = 'Brand is required.';
@@ -210,25 +215,18 @@ class AdminController {
         }
 
         // Insert car record
-        $stmt = $this->db->prepare("
-            INSERT INTO tbl_car (model_id, plate_number, color, year, status, image)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->bind_param('issis' . ($image_path !== null ? 's' : ''), $model_id, $plate_number, $color, $year, $status, ...$image_path !== null ? [$image_path] : []);
-        
-        // Simpler approach without type juggling issues
         if ($image_path) {
             $stmt = $this->db->prepare("
-                INSERT INTO tbl_car (model_id, plate_number, color, year, status, image)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO tbl_car (model_id, plate_number, color, year, transmission, fuel_type, seats, engine, daily_rate, status, image)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param('issis' . 's', $model_id, $plate_number, $color, $year, $status, $image_path);
+            $stmt->bind_param('ississsdsds', $model_id, $plate_number, $color, $year, $transmission, $fuel_type, $seats, $engine, $daily_rate, $status, $image_path);
         } else {
             $stmt = $this->db->prepare("
-                INSERT INTO tbl_car (model_id, plate_number, color, year, status, image)
-                VALUES (?, ?, ?, ?, ?, NULL)
+                INSERT INTO tbl_car (model_id, plate_number, color, year, transmission, fuel_type, seats, engine, daily_rate, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param('issis', $model_id, $plate_number, $color, $year, $status);
+            $stmt->bind_param('ississsds', $model_id, $plate_number, $color, $year, $transmission, $fuel_type, $seats, $engine, $daily_rate, $status);
         }
         $stmt->execute();
         $stmt->close();
@@ -278,13 +276,17 @@ class AdminController {
         $this->requireAdmin();
         
         $id            = (int)($_POST['car_id'] ?? 0);
-        $model_id      = (int)$_POST['model_id'];
         $plate_number  = strtoupper(trim($_POST['plate_number']));
         $color         = trim($_POST['color']);
         $year          = (int)$_POST['year'];
         $status        = $_POST['status'] ?? 'available';
+        $transmission  = $_POST['transmission'] ?? 'Automatic';
+        $fuel_type     = $_POST['fuel_type'] ?? 'Gasoline';
+        $seats         = (int)($_POST['seats'] ?? 5);
+        $engine        = trim($_POST['engine'] ?? '');
+        $daily_rate    = (float)($_POST['daily_rate'] ?? 0);
 
-        if (empty($model_id) || empty($plate_number) || empty($color)) {
+        if (empty($plate_number) || empty($color)) {
             $_SESSION['error'] = 'Please fill in all required fields.';
             header('Location: ' . BASE_URL . '?page=admin-cars-edit&id=' . $id);
             exit;
@@ -305,14 +307,18 @@ class AdminController {
 
         $stmt = $this->db->prepare("
             UPDATE tbl_car SET
-                model_id     = ?,
                 plate_number = ?,
                 color        = ?,
                 year         = ?,
-                status       = ?
+                status       = ?,
+                transmission = ?,
+                fuel_type    = ?,
+                seats        = ?,
+                engine       = ?,
+                daily_rate   = ?
             WHERE car_id = ?
         ");
-        $stmt->bind_param('issisi', $model_id, $plate_number, $color, $year, $status, $id);
+        $stmt->bind_param('sssissdsdi', $plate_number, $color, $year, $status, $transmission, $fuel_type, $seats, $engine, $daily_rate, $id);
         $stmt->execute();
         $stmt->close();
 

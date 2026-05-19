@@ -8,15 +8,15 @@ class Driver {
     public static function all(): array {
         $db     = Database::getInstance();
         $result = $db->query("
-            SELECT driver_id                                  AS id,
-                   driver_fname                               AS fname,
-                   driver_lname                               AS lname,
-                   CONCAT(driver_fname, ' ', driver_lname)   AS name,
-                   driver_email                               AS email,
-                   driver_phone                               AS phone,
-                   driver_status                              AS status
+            SELECT driver_id                                 AS id,
+                   drvr_fname                                AS fname,
+                   drvr_lname                                AS lname,
+                   CONCAT(drvr_fname, ' ', drvr_lname)      AS name,
+                   drvr_phone_number                         AS phone,
+                   rate_per_day                              AS rate,
+                   driver_status                             AS status
             FROM tbl_driver
-            ORDER BY driver_fname ASC
+            ORDER BY drvr_fname ASC
         ");
 
         if (!$result) return [];
@@ -29,16 +29,16 @@ class Driver {
     public static function available(): array {
         $db     = Database::getInstance();
         $stmt   = $db->prepare("
-            SELECT driver_id                                  AS id,
-                   driver_fname                               AS fname,
-                   driver_lname                               AS lname,
-                   CONCAT(driver_fname, ' ', driver_lname)   AS name,
-                   driver_email                               AS email,
-                   driver_phone                               AS phone,
-                   driver_status                              AS status
+            SELECT driver_id                                 AS id,
+                   drvr_fname                                AS fname,
+                   drvr_lname                                AS lname,
+                   CONCAT(drvr_fname, ' ', drvr_lname)      AS name,
+                   drvr_phone_number                         AS phone,
+                   rate_per_day                              AS rate,
+                   driver_status                             AS status
             FROM tbl_driver
             WHERE driver_status = 'available'
-            ORDER BY driver_fname ASC
+            ORDER BY drvr_fname ASC
         ");
 
         if (!$stmt) return [];
@@ -55,13 +55,13 @@ class Driver {
     public static function find(int $id): ?array {
         $db   = Database::getInstance();
         $stmt = $db->prepare("
-            SELECT driver_id                                  AS id,
-                   driver_fname                               AS fname,
-                   driver_lname                               AS lname,
-                   CONCAT(driver_fname, ' ', driver_lname)   AS name,
-                   driver_email                               AS email,
-                   driver_phone                               AS phone,
-                   driver_status                              AS status
+            SELECT driver_id                                 AS id,
+                   drvr_fname                                AS fname,
+                   drvr_lname                                AS lname,
+                   CONCAT(drvr_fname, ' ', drvr_lname)      AS name,
+                   drvr_phone_number                         AS phone,
+                   rate_per_day                              AS rate,
+                   driver_status                             AS status
             FROM tbl_driver
             WHERE driver_id = ?
             LIMIT 1

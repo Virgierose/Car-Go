@@ -49,6 +49,30 @@ $old = $old ?? [];
                 <input type="text" name="color" class="form-input" placeholder="e.g. Black" value="<?= htmlspecialchars($old['color'] ?? $_POST['color'] ?? '') ?>" required>
             </div>
             <div class="form-group">
+                <label class="form-label">Transmission</label>
+                <select name="transmission" class="form-select">
+                    <option value="Automatic" <?= ($old['transmission'] ?? $_POST['transmission'] ?? 'Automatic') === 'Automatic' ? 'selected' : '' ?>>Automatic</option>
+                    <option value="Manual" <?= ($old['transmission'] ?? $_POST['transmission'] ?? '') === 'Manual' ? 'selected' : '' ?>>Manual</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fuel Type</label>
+                <select name="fuel_type" class="form-select">
+                    <option value="Gasoline" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? 'Gasoline') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
+                    <option value="Diesel" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? '') === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
+                    <option value="Electric" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? '') === 'Electric' ? 'selected' : '' ?>>Electric</option>
+                    <option value="Hybrid" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? '') === 'Hybrid' ? 'selected' : '' ?>>Hybrid</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Seats</label>
+                <input type="number" name="seats" class="form-input" placeholder="e.g. 5" min="1" max="20" value="<?= htmlspecialchars($old['seats'] ?? $_POST['seats'] ?? '5') ?>">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Engine</label>
+                <input type="text" name="engine" class="form-input" placeholder="e.g. 2.0L" value="<?= htmlspecialchars($old['engine'] ?? $_POST['engine'] ?? '') ?>">
+            </div>
+            <div class="form-group">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
                     <option value="available" <?= ($old['status'] ?? $_POST['status'] ?? 'available') === 'available' ? 'selected' : '' ?>>Available</option>
@@ -57,7 +81,17 @@ $old = $old ?? [];
                 </select>
             </div>
         </div>
-        </div>
+
+        <div class="form-divider"></div>
+        <div class="form-section-label">Pricing & Status</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Daily Rate (₱) <span class="req">*</span></label>
+                <div class="input-prefix-wrap">
+                    <span class="input-prefix">₱</span>
+                    <input type="number" name="daily_rate" class="form-input has-prefix" placeholder="0.00" step="0.01" min="0" value="<?= htmlspecialchars($old['daily_rate'] ?? $_POST['daily_rate'] ?? '0') ?>" required>
+                </div>
+            </div>
         <div class="form-divider"></div>
         <div class="form-section-label">Car Image</div>
         <div class="form-group">
@@ -90,6 +124,9 @@ $old = $old ?? [];
 .req { color:var(--red); }
 .form-input, .form-select { background:var(--black-card); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:11px 14px; font-size:.9rem; width:100%; box-sizing:border-box; transition:border-color .2s; }
 .form-input:focus, .form-select:focus { outline:none; border-color:var(--red); }
+.input-prefix-wrap { position:relative; }
+.input-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--silver); }
+.has-prefix { padding-left:28px; }
 .form-divider { border:none; border-top:1px solid var(--border); margin:8px 0 24px; }
 .form-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:28px; }
 .btn-primary { background:var(--red); color:var(--white); border:none; padding:11px 22px; border-radius:8px; font-size:.85rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:background .2s; }
