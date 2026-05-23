@@ -7,80 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/CARGO/assets/css/style.css">
-    <style>
-        /* ── Admin profile dropdown ── */
-        .admin-profile {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            cursor: pointer;
-        }
-        .admin-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #8B0000;
-            border: 2px solid #C0111F;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1rem;
-            color: #fff;
-            flex-shrink: 0;
-            transition: .2s;
-        }
-        .admin-profile:hover .admin-avatar {
-            border-color: #fff;
-            box-shadow: 0 0 0 3px rgba(192,17,31,0.3);
-        }
-        .admin-dropdown {
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
-            background: rgba(10,10,10,.97);
-            border: 1px solid #2e2e2e;
-            border-radius: 8px;
-            min-width: 160px;
-            padding: 6px 0;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(-6px);
-            transition: opacity .2s, transform .2s;
-            z-index: 300;
-        }
-        .admin-profile:hover .admin-dropdown,
-        .admin-profile:focus-within .admin-dropdown {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateY(0);
-        }
-        .admin-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 16px;
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: .85rem;
-            font-weight: 600;
-            letter-spacing: .05em;
-            text-transform: uppercase;
-            color: rgba(245,245,245,.75);
-            transition: .15s;
-        }
-        .admin-dropdown a:hover {
-            background: rgba(255,255,255,.06);
-            color: #fff;
-        }
-        .admin-dropdown a.danger { color: #f87171; }
-        .admin-dropdown a.danger:hover { background: rgba(192,17,31,.12); color: #ef4444; }
-        .admin-dropdown hr {
-            border: none;
-            border-top: 1px solid #2e2e2e;
-            margin: 4px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="/CARGO/assets/css/header.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 

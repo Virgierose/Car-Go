@@ -37,8 +37,11 @@ ob_start();
                 <th>Model</th>
                 <th>Brand</th>
                 <th>Plate No.</th>
-                <th>Color</th>
                 <th>Year</th>
+                <th>Seats</th>
+                <th>Transmission</th>
+                <th>Fuel Type</th>
+                <th>Engine</th>
                 <th>Daily Rate</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -52,11 +55,11 @@ ob_start();
                 <td><?= htmlspecialchars($c['model_name']) ?></td>
                 <td><?= htmlspecialchars($c['brand']) ?></td>
                 <td><code class="plate-code"><?= htmlspecialchars($c['plate_number']) ?></code></td>
-                <td>
-                    <span class="color-dot" style="background:<?= strtolower($c['color']) ?>"></span>
-                    <?= htmlspecialchars($c['color']) ?>
-                </td>
                 <td><?= $c['year'] ?></td>
+                <td><?= $c['seats'] ?? '-' ?></td>
+                <td><?= $c['transmission'] ?? '-' ?></td>
+                <td><?= $c['fuel_type'] ?? '-' ?></td>
+                <td><?= $c['engine'] ?? '-' ?></td>
                 <td>₱<?= number_format($c['daily_rate'] ?? 0, 2) ?></td>
                 <td><span class="badge badge-<?= strtolower($c['status']) ?>"><?= $c['status'] ?></span></td>
                 <td>
@@ -72,14 +75,14 @@ ob_start();
             </tr>
             <?php endforeach; ?>
         <?php else: ?>
-            <tr><td colspan="9" class="empty-row"><i class="fas fa-car" style="font-size:2rem;margin-bottom:8px;display:block;opacity:.3"></i>No cars in fleet.</td></tr>
+            <tr><td colspan="12" class="empty-row"><i class="fas fa-car" style="font-size:2rem;margin-bottom:8px;display:block;opacity:.3"></i>No cars in fleet.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>
 </div>
 
 <style>
-.filter-bar { background:var(--black-card); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin-bottom:20px; }
+.filter-bar { background:var(--black-card); border:1px solid var(--border); border-radius:10px; padding:16px 20px; margin:20px 24px 20px 24px; }
 .filter-form { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 .filter-group { position:relative; display:flex; align-items:center; }
 .filter-icon { position:absolute; left:12px; color:var(--silver); font-size:.8rem; }

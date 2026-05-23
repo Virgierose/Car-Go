@@ -18,7 +18,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ── Database ──────────────────────────────────
-require_once APP_ROOT . '/config/Database.php';
+// FIXED: was '/config/Database.php' — now points to the single correct location
+require_once APP_ROOT . '/app/core/Database.php';
 
 // ── render() helper ───────────────────────────
 if (!function_exists('render')) {
@@ -34,7 +35,8 @@ if (!function_exists('render')) {
         require APP_ROOT . '/app/views/layouts/footer.php';
     }
 }
-// ── renderAdmin() helper ───────────────────
+
+// ── renderAdmin() helper ───────────────────────
 if (!function_exists('renderAdmin')) {
     function renderAdmin(string $view, array $data = []): void {
         extract($data, EXTR_SKIP);
@@ -43,12 +45,9 @@ if (!function_exists('renderAdmin')) {
             http_response_code(404);
             die('View not found: <strong>' . htmlspecialchars($view) . '</strong>');
         }
-        // Capture view output into $content variable
         ob_start();
         require $viewFile;
         $content = ob_get_clean();
-        
-        // Now include the admin layout with the content
         require APP_ROOT . '/app/views/layouts/admin_layout.php';
     }
 }

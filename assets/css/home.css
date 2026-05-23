@@ -1,0 +1,203 @@
+/* ============================================================
+   home.css  –  Styles for home/index.php
+   CarGo Car Rental
+   ============================================================ */
+
+
+/* ============================================================
+   QUICK SEARCH BAR
+   ============================================================ */
+
+/* Wrapper strip below the hero */
+.quick-search-strip {
+  background: var(--black2);
+  border-bottom: 1px solid var(--grey);
+}
+
+.quick-search-strip .container {
+  /* inherits container styles from style.css */
+}
+
+/* Grid row: date fields + car type + search button */
+.quick-search-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: end;
+  gap: 14px;
+  padding: 20px 0;
+}
+
+/* "Quick Search" label above the grid */
+.quick-search-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding-top: 16px;
+  margin-bottom: 10px;
+}
+
+/* Reset margin on form-groups inside quick search */
+.quick-search-grid .form-group {
+  margin: 0;
+}
+
+/* Search button alignment */
+.quick-search-grid .btn {
+  border-radius: var(--radius);
+  height: 100%;
+}
+
+
+/* ============================================================
+   WHY CARGO SECTION  (feature cards)
+   ============================================================ */
+
+/* Center-aligned section header */
+.why-cargo-head {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* Constrain the sub-text width */
+.why-cargo-head .section-sub {
+  margin: 0 auto;
+  max-width: 480px;
+}
+
+
+/* ============================================================
+   FEATURED CARS SECTION
+   ============================================================ */
+
+/* Row: section heading left, "View All" button right */
+.featured-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+}
+
+/* Car image placeholder / image wrapper */
+.card-img-placeholder {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 48px;
+  min-height: 200px;
+  overflow: hidden;
+}
+
+/* Actual car image inside the card */
+.card-img-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* ============================================================
+   CTA SECTION  (Ready to Drive?)
+   ============================================================ */
+
+/* Outer card wrapper */
+.cta-card {
+  background: var(--black2);
+  border: 1px solid var(--grey);
+  border-top: 3px solid var(--red);
+  border-radius: 12px;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Radial red glow behind the CTA content */
+.cta-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(224,27,27,.1), transparent 70%);
+  pointer-events: none;
+}
+
+/* Content sits above the pseudo-element */
+.cta-card-inner {
+  position: relative;
+}
+
+/* CTA section label */
+.cta-card .section-label {
+  display: block;
+}
+
+/* CTA heading */
+.cta-card .section-title {
+  margin: .4rem 0 1rem;
+}
+
+/* CTA body copy */
+.cta-card p {
+  color: var(--white2);
+  margin: 0 auto 2rem;
+  max-width: 460px;
+}
+
+/* CTA button row */
+.cta-card-btns {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  tablet  (≤ 900px)
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  /* Quick search: stack to 2 columns */
+  .quick-search-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Search button spans full width */
+  .quick-search-grid .btn {
+    grid-column: 1 / -1;
+  }
+
+  /* Featured cars head: stack label/button */
+  .featured-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  small mobile  (≤ 480px)
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  /* Quick search: single column */
+  .quick-search-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* CTA card: tighter padding */
+  .cta-card { padding: 2.5rem 1.25rem; }
+
+  /* CTA buttons stack */
+  .cta-card-btns {
+    flex-direction: column;
+    align-items: center;
+  }
+}

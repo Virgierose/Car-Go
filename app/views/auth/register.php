@@ -158,11 +158,7 @@ function old(string $key): string {
 <div class="page-content">
   <div class="wrapper">
 
-    <div class="logo">
-      <div class="logo-text">Car<span>Go</span></div>
-      <div class="logo-sub">Premium Car Rental</div>
-    </div>
-
+    <br><br>
     <div class="card">
       <div class="card-heading">
         <h1>Create Account</h1>

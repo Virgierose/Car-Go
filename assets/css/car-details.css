@@ -1,0 +1,254 @@
+/* ============================================================
+   car-details.css  –  Styles for cars/details.php
+   CarGo Car Rental
+   ============================================================ */
+
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+
+.page-hero {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(160deg, #0d0d0d 0%, #1a0f0f 60%, #0a0a0a 100%);
+  overflow: hidden;
+}
+
+/* Radial red accent glows */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 60% at 80% 40%, rgba(192,57,43,.12), transparent),
+    radial-gradient(ellipse 40% 40% at 20% 70%, rgba(192,57,43,.06), transparent);
+}
+
+/* Subtle grid overlay */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(192,57,43,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192,57,43,.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Large decorative background word */
+.hero-ghost {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 120px;
+  color: rgba(255,255,255,.03);
+  letter-spacing: 6px;
+  display: none; /* enable if you want it visible */
+}
+
+/* Hero content wrapper */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 40px 40px;
+}
+
+/* Small red label */
+.label-tag {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 12px;
+}
+
+/* Main heading */
+.hero-h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 56px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+/* Breadcrumb */
+.hero-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+.hero-sub a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.hero-sub a:hover { color: var(--red); }
+
+.sep {
+  margin: 0 6px;
+  color: #444;
+}
+
+/* Color badge below heading */
+.hero-badge {
+  margin-top: 15px;
+  display: inline-block;
+  background: rgba(192,57,43,.15);
+  color: var(--red);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+
+/* ============================================================
+   DETAILS LAYOUT  (left column + sticky right sidebar)
+   ============================================================ */
+
+/* Two-column grid */
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* ── Main image ── */
+.car-img-wrap {
+  background: var(--black3);
+  border: 1px solid var(--grey);
+  border-radius: 10px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.car-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* ── Specs grid (3 columns) ── */
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .75rem;
+  margin-bottom: 2rem;
+}
+
+/* Individual spec tile */
+.spec-tile {
+  background: var(--black3);
+  border: 1px solid var(--grey);
+  border-radius: 6px;
+  padding: .75rem;
+}
+
+.spec-tile-label {
+  font-size: .72rem;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.spec-tile-value {
+  font-weight: 700;
+  margin-top: .2rem;
+}
+
+/* ── Section heading spacing ── */
+.details-section-title {
+  margin-bottom: .75rem;
+}
+
+/* ── About text ── */
+.about-text {
+  color: var(--white2);
+  line-height: 1.85;
+}
+
+/* ── Thumbnail strip ── */
+.car-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+
+/* ============================================================
+   BOOKING SIDEBAR  (sticky right column)
+   ============================================================ */
+
+.booking-sidebar {
+  background: var(--black2);
+  border: 1px solid var(--grey);
+  border-radius: 10px;
+  padding: 1.5rem;
+  position: sticky;
+  top: 80px;
+}
+
+/* Daily rate display */
+.booking-rate {
+  font-size: 2.75rem;
+  color: var(--red);
+  margin-bottom: 1.25rem;
+  line-height: 1;
+}
+
+.booking-rate-unit {
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+/* Back button spacing */
+.booking-back {
+  margin-top: 1rem;
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  tablet  (≤ 900px)
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  /* Stack to single column */
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sidebar no longer sticky when stacked */
+  .booking-sidebar {
+    position: static;
+  }
+
+  /* Hero padding */
+  .hero-inner { padding: 48px 24px 32px; }
+
+  /* Specs: 2 columns on tablet */
+  .specs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  small mobile  (≤ 480px)
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  /* Hero heading smaller */
+  .hero-h1 { font-size: 40px; }
+
+  /* Specs: single column */
+  .specs-grid { grid-template-columns: 1fr; }
+
+  /* Tighter hero padding */
+  .hero-inner { padding: 36px 18px 28px; }
+}

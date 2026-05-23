@@ -1,21 +1,20 @@
 <?php
-/**
- * Database.php
- * Path: C:\xampp\htdocs\CarGo\config\Database.php
- */
+
+// Guard against double-inclusion (e.g. if any file still requires this directly)
+if (class_exists('Database', false)) {
+    return;
+}
 
 class Database {
 
     private static ?Database $instance = null;
     private mysqli $connection;
 
-    // ── Change these to match your XAMPP setup ──────────────────────────────
     private string $host     = 'localhost';
     private string $username = 'root';
-    private string $password = '';          // XAMPP default: empty string
-    private string $database = 'cargo_db';  // must match your DB name exactly
+    private string $password = '';
+    private string $database = 'cargo_db';
     private int    $port     = 3306;
-    // ────────────────────────────────────────────────────────────────────────
 
     private function __construct() {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -33,7 +32,6 @@ class Database {
         } catch (mysqli_sql_exception $e) {
             $code = $e->getCode();
 
-            // Friendly error messages per error code
             $messages = [
                 1045 => "Access denied — wrong username or password for MySQL root user.",
                 1049 => "Database 'cargo_db' does not exist — please import cargo_db.sql first.",
@@ -43,7 +41,6 @@ class Database {
             $friendly = $messages[$code] ?? 'DB Error [' . $code . ']: ' . $e->getMessage();
             error_log('Database connection failed: ' . $e->getMessage());
 
-            // Show helpful message on screen during development
             die('
                 <div style="font-family:monospace;background:#1e1e1e;color:#f48771;
                             padding:2rem;margin:2rem;border-left:4px solid #f48771;">
@@ -59,7 +56,6 @@ class Database {
         }
     }
 
-    /** Returns the single shared mysqli connection */
     public static function getInstance(): mysqli {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -67,6 +63,5 @@ class Database {
         return self::$instance->connection;
     }
 
-    /** Prevent cloning */
     private function __clone() {}
 }

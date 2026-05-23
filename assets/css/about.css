@@ -1,0 +1,674 @@
+/* ============================================================
+   about.css  –  Styles for pages/about.php
+   CarGo Car Rental
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap');
+
+/* ─── Shared font family ─────────────────────────────────── */
+.about-hero,
+.about-intro,
+.features-section,
+.location-section,
+.cta-strip {
+  font-family: 'Barlow', sans-serif;
+}
+
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+
+.about-hero {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background:
+    linear-gradient(to right, rgba(0,0,0,.82) 0%, rgba(0,0,0,.60) 100%),
+    url('/CarGo/assets/img/aboutB.png') center / 100% no-repeat;
+}
+
+/* Subtle red radial accents over the hero image */
+.about-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 55% at 85% 30%, rgba(192,57,43,.10) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 45% at 15% 75%, rgba(192,57,43,.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Large decorative background word */
+.hero-ghost {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(90px, 16vw, 220px);
+  color: rgba(255,255,255,.025);
+  letter-spacing: 6px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  display: none; /* enable if you want it visible */
+}
+
+/* Hero content wrapper */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  padding: 56px 48px;
+  max-width: 1240px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Small red label above the heading */
+.label-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+.label-tag::before {
+  content: '';
+  width: 28px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+/* Main hero heading */
+.hero-h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(56px, 9vw, 108px);
+  line-height: .92;
+  letter-spacing: 2px;
+  color: var(--white);
+}
+.hero-h1 .red { color: var(--red); }
+
+/* Breadcrumb / sub-text */
+.hero-sub {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 300;
+}
+.hero-sub a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.hero-sub a:hover { color: var(--red); }
+.hero-sub .sep {
+  margin: 0 6px;
+  color: var(--grey);
+}
+
+
+/* ============================================================
+   INTRO SECTION  (Our Story + Stats grid)
+   ============================================================ */
+
+.about-intro {
+  background: var(--black2);
+  border-top: 1px solid var(--grey);
+  border-bottom: 1px solid var(--grey);
+  padding: 88px 48px;
+}
+
+.about-intro .wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+
+/* ── Section tag (small red label with trailing line) ── */
+.section-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 600;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-tag::after {
+  content: '';
+  height: 1px;
+  width: 60px;
+  background: var(--grey);
+}
+
+/* ── Left column: heading + paragraphs ── */
+.intro-left h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(38px, 4.5vw, 56px);
+  line-height: .95;
+  letter-spacing: 1px;
+  margin-bottom: 22px;
+  color: var(--white);
+}
+.intro-left h2 .red { color: var(--red); }
+
+.intro-left p {
+  color: var(--muted);
+  line-height: 1.85;
+  font-size: 15px;
+  margin-bottom: 14px;
+}
+
+/* ── Right column: 2×2 stats grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.stat-box {
+  background: var(--black3);
+  border: 1px solid var(--grey);
+  border-radius: 12px;
+  padding: 26px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .22s, transform .22s;
+  cursor: default;
+}
+
+/* Red top-border reveal on hover */
+.stat-box::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .3s;
+}
+.stat-box:hover {
+  border-color: var(--red);
+  transform: translateY(-3px);
+}
+.stat-box:hover::after { transform: scaleX(1); }
+
+/* Stat number */
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px;
+  color: var(--red);
+  line-height: 1;
+}
+
+/* Stat label */
+.stat-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+
+/* ============================================================
+   FEATURES SECTION  (What Sets Us Apart)
+   ============================================================ */
+
+.features-section {
+  padding: 88px 48px;
+  background: var(--black);
+}
+
+.features-section .wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* ── Section heading row ── */
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 44px;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.section-head h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(34px, 4vw, 50px);
+  letter-spacing: 1px;
+  color: var(--white);
+  line-height: 1;
+}
+
+.section-head p {
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 280px;
+  text-align: right;
+  line-height: 1.65;
+}
+
+/* ── 3-column feature card grid ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--grey); /* gap color between cards */
+  border: 1px solid var(--grey);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Individual feature card */
+.feat-card {
+  background: var(--black2);
+  padding: 40px 32px 36px;
+  position: relative;
+  transition: background .22s;
+}
+.feat-card:hover { background: var(--black3); }
+
+/* Red top-border reveal on hover */
+.feat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .3s;
+}
+.feat-card:hover::before { transform: scaleX(1); }
+
+/* Large ghost number in top-right corner */
+.feat-num {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  color: rgba(255,255,255,.04);
+  line-height: 1;
+  transition: color .22s;
+}
+.feat-card:hover .feat-num { color: rgba(224,27,27,.08); }
+
+/* Icon badge */
+.feat-icon {
+  width: 52px;
+  height: 52px;
+  background: var(--redglow);
+  border: 1px solid rgba(224,27,27,.25);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 22px;
+  transition: background .22s, border-color .22s;
+}
+.feat-card:hover .feat-icon {
+  background: rgba(224,27,27,.18);
+  border-color: var(--red);
+}
+
+.feat-card h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 10px;
+  letter-spacing: .04em;
+}
+
+.feat-card p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+
+/* ============================================================
+   LOCATION SECTION
+   ============================================================ */
+
+.location-section {
+  padding: 88px 48px;
+  background: var(--black2);
+  border-top: 1px solid var(--grey);
+}
+
+.location-section .wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.45fr;
+  gap: 60px;
+  align-items: center;
+}
+
+/* ── Location tag (red label with leading line) ── */
+.loc-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.loc-tag::before {
+  content: '';
+  width: 28px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+/* ── Left column: heading, lead text, info cards ── */
+.loc-left h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(38px, 4.5vw, 54px);
+  color: var(--white);
+  line-height: .95;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.loc-left > p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.85;
+  margin-bottom: 34px;
+}
+
+/* Info card list */
+.loc-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 15px 16px;
+  background: var(--black3);
+  border: 1px solid var(--grey);
+  border-radius: 10px;
+  transition: border-color .22s;
+}
+.loc-item:hover { border-color: var(--red); }
+
+.loc-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--redglow);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.loc-info strong {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 2px;
+  letter-spacing: .5px;
+}
+.loc-info span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ── Right column: embedded map ── */
+.loc-map {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--grey);
+  position: relative;
+  box-shadow: 0 28px 64px rgba(0,0,0,.6);
+}
+
+.loc-map iframe {
+  display: block;
+  width: 100%;
+  height: 430px;
+  border: 0;
+  filter: grayscale(20%) contrast(1.05) brightness(.9);
+}
+
+/* Floating location badge over the map */
+.map-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(10,10,10,.92);
+  border: 1px solid rgba(224,27,27,.35);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  backdrop-filter: blur(10px);
+}
+
+/* Animated red dot inside the map badge */
+.map-dot {
+  width: 9px;
+  height: 9px;
+  background: var(--red);
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224,27,27,.55); }
+  60%       { box-shadow: 0 0 0 7px rgba(224,27,27,0); }
+}
+
+
+/* ============================================================
+   CTA STRIP  (Book a Ride)
+   ============================================================ */
+
+.cta-strip {
+  padding: 72px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(to right, rgba(0,0,0,.82) 0%, rgba(0,0,0,.60) 100%),
+    url('https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1600&q=80') center / cover no-repeat;
+  border-top: 1px solid var(--grey);
+}
+
+/* Subtle red radial glow over the CTA background */
+.cta-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 120% at 50% 50%, rgba(224,27,27,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Centered content wrapper */
+.cta-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+/* Small label above the CTA heading */
+.cta-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+/* Decorative lines flanking the label */
+.cta-label::before,
+.cta-label::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: var(--red);
+  opacity: .5;
+}
+
+/* CTA heading */
+.cta-strip h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 5.5vw, 68px);
+  line-height: .92;
+  letter-spacing: 2px;
+  color: var(--white);
+  margin-bottom: 18px;
+}
+
+/* CTA body text */
+.cta-strip p {
+  color: var(--muted);
+  font-size: 15px;
+  margin-bottom: 34px;
+  line-height: 1.75;
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  tablet  (≤ 900px)
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  /* Stack intro and location grids */
+  .about-intro .wrap,
+  .location-section .wrap {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+
+  /* Stack feature cards */
+  .features-grid { grid-template-columns: 1fr; }
+
+  /* Remove gap trick — use border instead on single-column */
+  .features-grid {
+    background: transparent;
+    gap: 12px;
+    border: none;
+  }
+  .feat-card {
+    border: 1px solid var(--grey);
+    border-radius: 12px;
+  }
+
+  /* Left-align section-head paragraph */
+  .section-head p {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  /* Shorter map iframe */
+  .loc-map iframe { height: 300px; }
+
+  /* Tighter section padding */
+  .about-intro,
+  .features-section,
+  .location-section,
+  .cta-strip  { padding: 60px 24px; }
+
+  .hero-inner { padding: 48px 24px; }
+
+  /* Stats grid: keep 2 cols but cap font size */
+  .stat-num { font-size: 36px; }
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  small mobile  (≤ 480px)
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  /* Reduce hero min-height */
+  .about-hero { min-height: 300px; }
+
+  /* Further tighten hero padding */
+  .hero-inner { padding: 36px 18px; }
+
+  /* Slightly smaller hero heading on tiny screens */
+  .hero-h1 { font-size: clamp(44px, 13vw, 72px); }
+
+  /* Full-width section padding */
+  .about-intro,
+  .features-section,
+  .location-section,
+  .cta-strip  { padding: 48px 18px; }
+
+  /* Stats: single column on very small screens */
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-num   { font-size: 40px; }
+
+  /* Feature cards: tighter inner padding */
+  .feat-card { padding: 28px 22px 24px; }
+
+  /* Location map: shorter on tiny screens */
+  .loc-map iframe { height: 240px; }
+
+  /* Map badge: smaller so it doesn't overflow */
+  .map-badge { font-size: 11px; padding: 8px 10px; }
+
+  /* Section head: stack instead of flex row */
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* CTA strip: tighter padding */
+  .cta-strip { padding: 48px 18px; }
+}

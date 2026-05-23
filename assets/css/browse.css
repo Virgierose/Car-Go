@@ -1,0 +1,327 @@
+/* ============================================================
+   browse.css  –  Styles for cars/browse.php
+   CarGo Car Rental
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+
+.page-hero {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background:
+    linear-gradient(to right, rgba(0,0,0,.82) 0%, rgba(0,0,0,.60) 100%),
+    url('/CarGo/assets/img/carsB.png') center / 100% no-repeat;
+}
+
+/* Radial red accent glows */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 55% at 85% 30%, rgba(192,57,43,.10) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 45% at 15% 75%, rgba(192,57,43,.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Subtle red grid overlay */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(192,57,43,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192,57,43,.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+}
+
+/* Decorative concentric circles top-right */
+.hero-slash {
+  position: absolute;
+  top: -40px;
+  right: -80px;
+  width: 520px;
+  height: 520px;
+  border: 1px solid rgba(192,57,43,.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-slash::after {
+  content: '';
+  position: absolute;
+  inset: 40px;
+  border: 1px solid rgba(192,57,43,.04);
+  border-radius: 50%;
+}
+
+/* Large decorative background word */
+.hero-ghost {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(90px, 16vw, 220px);
+  color: rgba(255,255,255,.028);
+  letter-spacing: 6px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  display: none; /* enable if you want it visible */
+}
+
+/* Hero content wrapper */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  padding: 56px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Small red label tag */
+.label-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: #c0392b;
+  margin-bottom: 14px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.label-tag::before {
+  content: '';
+  width: 28px;
+  height: 2px;
+  background: #c0392b;
+  border-radius: 2px;
+}
+
+/* Main heading */
+.hero-h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(56px, 9vw, 108px);
+  line-height: .92;
+  letter-spacing: 2px;
+  color: #ffffff;
+}
+.hero-h1 .red { color: #c0392b; }
+
+/* Sub-text */
+.hero-sub {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #888888;
+  font-weight: 300;
+  font-family: 'DM Sans', sans-serif;
+}
+.hero-sub a       { color: #888888; text-decoration: none; }
+.hero-sub a:hover { color: #c0392b; }
+.hero-sub .sep    { margin: 0 6px; color: #222222; }
+
+
+/* ============================================================
+   BROWSE LAYOUT  (filter sidebar + car grid)
+   ============================================================ */
+
+/* Two-column grid */
+.browse-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+
+/* ============================================================
+   FILTER SIDEBAR
+   ============================================================ */
+
+.filter-sidebar {
+  background: var(--black2);
+  border: 1px solid var(--grey);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+/* "Filters" heading */
+.filter-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--grey);
+}
+
+/* Filter field label */
+.filter-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .6rem;
+}
+
+/* Filter text/number inputs */
+.filter-input {
+  width: 100%;
+  padding: .5rem;
+  background: var(--bg);
+  border: 1px solid var(--grey);
+  border-radius: 4px;
+  color: var(--white);
+  font-size: .9rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Reset button spacing */
+.filter-reset {
+  margin-top: .5rem;
+}
+
+
+/* ============================================================
+   RESULTS TOOLBAR  (count + sort dropdown)
+   ============================================================ */
+
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+/* "Showing X vehicles" text */
+.results-count {
+  color: var(--muted);
+  font-size: .88rem;
+}
+.results-count strong { color: var(--white); }
+.results-count .total { color: var(--muted); }
+
+/* Sort dropdown */
+.sort-select {
+  width: auto;
+  font-size: .85rem;
+  padding: .4rem .8rem;
+}
+
+
+/* ============================================================
+   CAR CARD  (image placeholder + image)
+   ============================================================ */
+
+/* Image wrapper with dark gradient placeholder */
+.card-img-placeholder {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 48px;
+  min-height: 200px;
+  overflow: hidden;
+}
+
+/* Actual car image */
+.card-img-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Card footer buttons take equal width */
+.card-foot .btn { flex: 1; }
+
+
+/* ============================================================
+   EMPTY STATE  (no results)
+   ============================================================ */
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 0;
+  color: var(--muted);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Clear filters button spacing */
+.empty-state .btn { margin-top: 1rem; }
+
+
+/* ============================================================
+   RESPONSIVE  –  tablet  (≤ 900px)
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  /* Hero padding */
+  .hero-inner { padding: 48px 24px; }
+
+  /* Stack filter sidebar above the grid */
+  .browse-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Filter sidebar: horizontal row on tablet */
+  .filter-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+  }
+
+  /* Title and buttons span full width */
+  .filter-title,
+  .filter-sidebar button,
+  .filter-sidebar .filter-reset {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE  –  small mobile  (≤ 480px)
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  /* Hero heading smaller */
+  .hero-h1 { font-size: clamp(44px, 13vw, 72px); }
+
+  /* Filter sidebar: back to single column */
+  .filter-sidebar { grid-template-columns: 1fr; }
+
+  /* Results toolbar: stack count + sort */
+  .results-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Sort dropdown: full width */
+  .sort-select { width: 100%; }
+}
