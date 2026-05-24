@@ -3,13 +3,15 @@ $pageTitle  = 'Add Driver';
 $activePage = 'drivers';
 ?>
 
+<link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/admin-drivers.css">
+
 <!-- PAGE HEADER -->
 <div class="page-header">
     <div>
         <h1 class="page-title-main">Add Driver</h1>
         <p class="page-subtitle">Register a new driver to the system</p>
     </div>
-    <a href="<?= BASE_URL ?>/admin/drivers" class="btn-ghost">
+    <a href="<?= BASE_URL ?>?page=admin-drivers" class="btn-ghost">
         <i class="fas fa-arrow-left"></i> Back to Drivers
     </a>
 </div>
@@ -28,7 +30,7 @@ $activePage = 'drivers';
 
 <!-- FORM -->
 <div class="form-card">
-    <form method="POST" action="<?= BASE_URL ?>/admin/drivers/store">
+    <form method="POST" action="<?= BASE_URL ?>?page=admin-drivers-store">
 
         <div class="form-section-title">
             <i class="fas fa-user"></i> Personal Information
@@ -105,7 +107,7 @@ $activePage = 'drivers';
         </div>
 
         <div class="form-actions">
-            <a href="<?= BASE_URL ?>/admin/drivers" class="btn-ghost">Cancel</a>
+            <a href="<?= BASE_URL ?>?page=admin-drivers" class="btn-ghost">Cancel</a>
             <button type="submit" class="btn-primary">
                 <i class="fas fa-user-plus"></i> Register Driver
             </button>

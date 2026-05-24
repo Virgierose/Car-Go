@@ -1,11 +1,10 @@
 <?php
-$pageTitle = 'Add New Car';
-$activePage = 'cars';
-ob_start();
+$pageTitle  = 'Add New Car';
+$activePage = 'admin-cars-create';
 
-$error = $error ?? null;
+$error  = $error  ?? null;
 $errors = $errors ?? [];
-$old = $old ?? [];
+$old    = $old    ?? [];
 ?>
 
 <div class="form-card">
@@ -15,7 +14,7 @@ $old = $old ?? [];
             <div><?= htmlspecialchars($error) ?></div>
         </div>
     <?php endif; ?>
-    
+
     <?php if (!empty($errors)): ?>
         <div class="alert alert-error">
             <i class="fas fa-exclamation-triangle"></i>
@@ -24,74 +23,75 @@ $old = $old ?? [];
     <?php endif; ?>
 
     <form method="POST" action="<?= BASE_URL ?>?page=admin-cars-store" enctype="multipart/form-data">
-        <?php if (function_exists('csrf_field')) echo csrf_field(); ?>
 
         <div class="form-section-label">Vehicle Information</div>
         <div class="form-grid">
             <div class="form-group">
                 <label class="form-label">Brand <span class="req">*</span></label>
-                <input type="text" name="brand" class="form-input" placeholder="e.g. Toyota" value="<?= htmlspecialchars($old['brand'] ?? $_POST['brand'] ?? '') ?>" required>
+                <input type="text" name="brand" class="form-input" placeholder="e.g. Toyota" value="<?= htmlspecialchars($old['brand'] ?? '') ?>" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Model <span class="req">*</span></label>
-                <input type="text" name="model_name" class="form-input" placeholder="e.g. Vios" value="<?= htmlspecialchars($old['model_name'] ?? $_POST['model_name'] ?? '') ?>" required>
+                <input type="text" name="model_name" class="form-input" placeholder="e.g. Vios" value="<?= htmlspecialchars($old['model_name'] ?? '') ?>" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Plate Number <span class="req">*</span></label>
-                <input type="text" name="plate_number" class="form-input" placeholder="e.g. ABC 1234" value="<?= htmlspecialchars($old['plate_number'] ?? $_POST['plate_number'] ?? '') ?>" required>
+                <input type="text" name="plate_number" class="form-input" placeholder="e.g. ABC 1234" value="<?= htmlspecialchars($old['plate_number'] ?? '') ?>" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Year <span class="req">*</span></label>
-                <input type="number" name="year" class="form-input" placeholder="e.g. 2022" min="1990" max="2030" value="<?= htmlspecialchars($old['year'] ?? $_POST['year'] ?? '') ?>" required>
+                <input type="number" name="year" class="form-input" placeholder="e.g. 2022" min="1990" max="2030" value="<?= htmlspecialchars($old['year'] ?? '') ?>" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Color <span class="req">*</span></label>
-                <input type="text" name="color" class="form-input" placeholder="e.g. Black" value="<?= htmlspecialchars($old['color'] ?? $_POST['color'] ?? '') ?>" required>
+                <input type="text" name="color" class="form-input" placeholder="e.g. Black" value="<?= htmlspecialchars($old['color'] ?? '') ?>" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Transmission</label>
                 <select name="transmission" class="form-select">
-                    <option value="Automatic" <?= ($old['transmission'] ?? $_POST['transmission'] ?? 'Automatic') === 'Automatic' ? 'selected' : '' ?>>Automatic</option>
-                    <option value="Manual" <?= ($old['transmission'] ?? $_POST['transmission'] ?? '') === 'Manual' ? 'selected' : '' ?>>Manual</option>
+                    <option value="Automatic" <?= ($old['transmission'] ?? 'Automatic') === 'Automatic' ? 'selected' : '' ?>>Automatic</option>
+                    <option value="Manual"    <?= ($old['transmission'] ?? '') === 'Manual'    ? 'selected' : '' ?>>Manual</option>
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Fuel Type</label>
                 <select name="fuel_type" class="form-select">
-                    <option value="Gasoline" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? 'Gasoline') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
-                    <option value="Diesel" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? '') === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
-                    <option value="Electric" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? '') === 'Electric' ? 'selected' : '' ?>>Electric</option>
-                    <option value="Hybrid" <?= ($old['fuel_type'] ?? $_POST['fuel_type'] ?? '') === 'Hybrid' ? 'selected' : '' ?>>Hybrid</option>
+                    <option value="Gasoline" <?= ($old['fuel_type'] ?? 'Gasoline') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
+                    <option value="Diesel"   <?= ($old['fuel_type'] ?? '') === 'Diesel'   ? 'selected' : '' ?>>Diesel</option>
+                    <option value="Electric" <?= ($old['fuel_type'] ?? '') === 'Electric' ? 'selected' : '' ?>>Electric</option>
+                    <option value="Hybrid"   <?= ($old['fuel_type'] ?? '') === 'Hybrid'   ? 'selected' : '' ?>>Hybrid</option>
                 </select>
             </div>
             <div class="form-group">
                 <label class="form-label">Seats</label>
-                <input type="number" name="seats" class="form-input" placeholder="e.g. 5" min="1" max="20" value="<?= htmlspecialchars($old['seats'] ?? $_POST['seats'] ?? '5') ?>">
+                <input type="number" name="seats" class="form-input" placeholder="e.g. 5" min="1" max="20" value="<?= htmlspecialchars($old['seats'] ?? '5') ?>">
             </div>
             <div class="form-group">
                 <label class="form-label">Engine</label>
-                <input type="text" name="engine" class="form-input" placeholder="e.g. 2.0L" value="<?= htmlspecialchars($old['engine'] ?? $_POST['engine'] ?? '') ?>">
+                <input type="text" name="engine" class="form-input" placeholder="e.g. 2.0L" value="<?= htmlspecialchars($old['engine'] ?? '') ?>">
             </div>
             <div class="form-group">
                 <label class="form-label">Status</label>
                 <select name="status" class="form-select">
-                    <option value="available" <?= ($old['status'] ?? $_POST['status'] ?? 'available') === 'available' ? 'selected' : '' ?>>Available</option>
-                    <option value="maintenance" <?= ($old['status'] ?? $_POST['status'] ?? '') === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
-                    <option value="rented" <?= ($old['status'] ?? $_POST['status'] ?? '') === 'rented' ? 'selected' : '' ?>>Rented</option>
+                    <option value="available"   <?= ($old['status'] ?? 'available') === 'available'   ? 'selected' : '' ?>>Available</option>
+                    <option value="maintenance" <?= ($old['status'] ?? '') === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
+                    <option value="rented"      <?= ($old['status'] ?? '') === 'rented'      ? 'selected' : '' ?>>Rented</option>
                 </select>
             </div>
         </div>
 
         <div class="form-divider"></div>
-        <div class="form-section-label">Pricing & Status</div>
+        <div class="form-section-label">Pricing</div>
         <div class="form-grid">
             <div class="form-group">
                 <label class="form-label">Daily Rate (₱) <span class="req">*</span></label>
                 <div class="input-prefix-wrap">
                     <span class="input-prefix">₱</span>
-                    <input type="number" name="daily_rate" class="form-input has-prefix" placeholder="0.00" step="0.01" min="0" value="<?= htmlspecialchars($old['daily_rate'] ?? $_POST['daily_rate'] ?? '0') ?>" required>
+                    <input type="number" name="daily_rate" class="form-input has-prefix" placeholder="0.00" step="0.01" min="0" value="<?= htmlspecialchars($old['daily_rate'] ?? '0') ?>" required>
                 </div>
             </div>
+        </div>
+
         <div class="form-divider"></div>
         <div class="form-section-label">Car Image</div>
         <div class="form-group">
@@ -105,34 +105,33 @@ $old = $old ?? [];
                 <img id="imagePreview" src="" alt="" style="display:none;max-height:180px;border-radius:8px;object-fit:contain;">
             </label>
         </div>
+
         <div class="form-actions">
-            <a href="/admin/cars" class="btn btn-outline">Cancel</a>
+            <a href="<?= BASE_URL ?>?page=admin-cars" class="btn btn-outline">Cancel</a>
             <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Car</button>
         </div>
     </form>
 </div>
 
 <style>
-.page-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; }
-.page-title-main { font-size:1.6rem; font-weight:700; color:var(--white); letter-spacing:.04em; margin:0; }
-.page-subtitle { color:var(--silver); font-size:.8rem; margin:4px 0 0; letter-spacing:.12em; text-transform:uppercase; }
-.form-card { background:var(--black-card); border:1px solid var(--border); border-radius:12px; padding:32px; max-width:900px; }
+.form-card { background:var(--black-card); border:1px solid var(--border); border-radius:12px; padding:32px; }
 .form-section-label { color:var(--red); font-size:.75rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px; }
-.form-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-bottom:24px; }
+.form-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:16px; margin-bottom:24px; }
 .form-group { display:flex; flex-direction:column; gap:6px; }
 .form-label { color:var(--silver); font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
 .req { color:var(--red); }
-.form-input, .form-select { background:var(--black-card); border:1px solid var(--border); border-radius:8px; color:var(--white); padding:11px 14px; font-size:.9rem; width:100%; box-sizing:border-box; transition:border-color .2s; }
+.form-input, .form-select { background:var(--black); border:1px solid var(--border); border-radius:6px; color:var(--white); padding:11px 14px; font-size:.9rem; width:100%; box-sizing:border-box; transition:border-color .2s; font-family:'Barlow',sans-serif; }
 .form-input:focus, .form-select:focus { outline:none; border-color:var(--red); }
+.form-select option { background:var(--black-card); }
 .input-prefix-wrap { position:relative; }
 .input-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--silver); }
 .has-prefix { padding-left:28px; }
 .form-divider { border:none; border-top:1px solid var(--border); margin:8px 0 24px; }
 .form-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:28px; }
-.btn-primary { background:var(--red); color:var(--white); border:none; padding:11px 22px; border-radius:8px; font-size:.85rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:background .2s; }
-.btn-primary:hover { background:#c0392b; }
+.btn-primary { background:var(--red); color:var(--white); border:none; padding:11px 22px; border-radius:8px; font-size:.85rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:background .2s; font-family:'Barlow',sans-serif; }
+.btn-primary:hover { background:#a00816; }
 .alert { border-radius:8px; padding:14px 18px; margin-bottom:20px; display:flex; align-items:flex-start; gap:10px; }
-.alert-error { background:rgba(231,76,60,.12); border:1px solid rgba(231,76,60,.3); color:#e74c3c; }
+.alert-error { background:rgba(192,17,31,.12); border:1px solid rgba(192,17,31,.3); color:#f87171; }
 .alert ul { margin:0; padding-left:16px; }
 .upload-area { display:flex; align-items:center; justify-content:center; flex-direction:column; border:2px dashed var(--border); border-radius:10px; padding:40px; cursor:pointer; transition:border-color .2s; text-align:center; }
 .upload-area:hover { border-color:var(--red); }

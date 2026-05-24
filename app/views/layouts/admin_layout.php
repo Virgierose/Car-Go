@@ -46,6 +46,9 @@
         <a href="<?= BASE_URL ?>?page=admin-messages" class="nav-item <?= ($activePage ?? '') === 'admin-messages' ? 'active' : '' ?>">
             <i class="fas fa-envelope"></i> Messages
         </a>
+
+        
+        
     </nav>
     <div class="sidebar-footer">
         Logged in as <strong style="color:var(--silver-lt)">Admin</strong><br>

@@ -52,6 +52,12 @@ $routes = [
     'admin-message-read'   => ['controller' => 'AdminController',     'method' => 'messageRead'],
     'admin-message-delete' => ['controller' => 'AdminController',     'method' => 'messageDelete'],
     'admin-message-reply'  => ['controller' => 'AdminController',     'method' => 'messageReply'],
+    //driver
+    'admin-drivers-create' => ['controller' => 'AdminController', 'method' => 'driverCreate'],
+    'admin-drivers-store'  => ['controller' => 'AdminController', 'method' => 'driverStore'],
+    'admin-drivers-edit'   => ['controller' => 'AdminController', 'method' => 'driverEdit'],
+    'admin-drivers-update' => ['controller' => 'AdminController', 'method' => 'driverUpdate'],
+    'admin-drivers-delete' => ['controller' => 'AdminController', 'method' => 'driverDelete'],
 ];
 
 if (isset($routes[$page])) {

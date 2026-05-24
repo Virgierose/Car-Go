@@ -1,4 +1,7 @@
-<?php $pageTitle = 'Dashboard'; $activePage = 'dashboard'; ob_start(); ?>
+<?php
+$pageTitle  = 'Dashboard';
+$activePage = 'admin';
+?>
 
 <!-- STATS -->
 <div class="stats-grid" style="align-items:center; margin-bottom:24px;">
@@ -66,7 +69,7 @@
     </table>
 </div>
 
-<!-- AVAILABLE CARS -->
+<!-- FLEET OVERVIEW -->
 <div class="card">
     <div class="card-header">
         <span class="card-title">Fleet Overview</span>
@@ -97,8 +100,3 @@
         </tbody>
     </table>
 </div>
-
-<?php
-$content = ob_get_clean();
-require __DIR__ . '/../layouts/admin_layout.php';
-?>
