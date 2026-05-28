@@ -5,7 +5,7 @@ $activePage = 'admin-bookings';
 
 <div class="tab-bar">
     <?php
-    $statuses  = ['All', 'Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled'];
+    $statuses  = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'];
     $activeTab = $_GET['status'] ?? 'All';
     foreach ($statuses as $s):
         $url = $s === 'All'
@@ -45,7 +45,7 @@ $activePage = 'admin-bookings';
     <table>
         <thead>
             <tr>
-                <th>#</th><th>Client</th><th>Car</th><th>Driver</th>
+                <th>#</th><th>Ref</th><th>Client</th><th>Car</th><th>Driver</th>
                 <th>Pickup</th><th>Return</th><th>Days</th><th>Total</th><th>Status</th><th>Actions</th>
             </tr>
         </thead>
@@ -53,25 +53,27 @@ $activePage = 'admin-bookings';
         <?php if (!empty($bookings)): ?>
             <?php foreach ($bookings as $b): ?>
             <tr>
-                <td><span class="id-badge">#<?= $b['booking_id'] ?></span></td>
-                <td><?= htmlspecialchars($b['clnt_fname'] . ' ' . $b['clnt_lname']) ?></td>
-                <td><?= htmlspecialchars($b['model_name'] ?? $b['plate_number']) ?></td>
-                <td><?= htmlspecialchars($b['drvr_fname'] . ' ' . $b['drvr_lname']) ?></td>
-                <td><?= $b['pickup_date'] ?></td>
-                <td><?= $b['return_date'] ?></td>
-                <td><?= $b['num_days'] ?></td>
-                <td>₱<?= number_format($b['total_price'], 2) ?></td>
-                <td><span class="badge badge-<?= strtolower($b['bkng_status']) ?>"><?= $b['bkng_status'] ?></span></td>
+                <td><span class="id-badge">#<?= $b['rental_id'] ?></span></td>
+                <td><span class="ref-badge"><?= htmlspecialchars($b['booking_ref']) ?></span></td>
+                <td><?= htmlspecialchars(($b['clnt_fname'] ?? '') . ' ' . ($b['clnt_lname'] ?? '')) ?></td>
+                <td><?= htmlspecialchars($b['model_name'] ?? $b['plate_number'] ?? '—') ?></td>
+                <td><?= $b['driver_id'] ? htmlspecialchars(($b['drvr_fname'] ?? '') . ' ' . ($b['drvr_lname'] ?? '')) : '<span class="no-driver">No Driver</span>' ?></td>
+                <td><?= date('M d, Y', strtotime($b['rental_start'])) ?></td>
+                <td><?= date('M d, Y', strtotime($b['rental_end'])) ?></td>
+                <td><?= $b['total_days'] ?></td>
+                <td>₱<?= number_format($b['total_amount'], 2) ?></td>
+                <td><span class="badge badge-<?= strtolower($b['rental_status']) ?>"><?= ucfirst($b['rental_status']) ?></span></td>
                 <td>
                     <div class="action-btns">
                         <div class="status-dropdown-wrap">
-                            <button class="btn-action btn-edit" title="Update Status" onclick="toggleDropdown(<?= $b['booking_id'] ?>)"><i class="fas fa-pen"></i></button>
-                            <div class="status-dropdown" id="dd-<?= $b['booking_id'] ?>">
-                                <?php foreach (['Pending','Confirmed','Active','Completed','Cancelled'] as $st): ?>
+                            <button class="btn-action btn-edit" title="Update Status" onclick="toggleDropdown(<?= $b['rental_id'] ?>)"><i class="fas fa-pen"></i></button>
+                            <div class="status-dropdown" id="dd-<?= $b['rental_id'] ?>">
+                                <?php foreach (['pending','confirmed','completed','cancelled'] as $st): ?>
                                 <form method="POST" action="<?= BASE_URL ?>?page=admin-bookings-status">
-                                    <input type="hidden" name="booking_id" value="<?= $b['booking_id'] ?>">
+                                    <input type="hidden" name="booking_id" value="<?= $b['rental_id'] ?>">
                                     <input type="hidden" name="status" value="<?= $st ?>">
-                                    <button type="submit" class="dd-item <?= $b['bkng_status'] === $st ? 'dd-active' : '' ?>"><?= $st ?></button>
+                                    <input type="hidden" name="current_tab" value="<?= htmlspecialchars($activeTab) ?>">
+                                    <button type="submit" class="dd-item <?= strtolower($b['rental_status']) === $st ? 'dd-active' : '' ?>"><?= ucfirst($st) ?></button>
                                 </form>
                                 <?php endforeach; ?>
                             </div>
@@ -81,7 +83,7 @@ $activePage = 'admin-bookings';
             </tr>
             <?php endforeach; ?>
         <?php else: ?>
-            <tr><td colspan="10" class="empty-row"><i class="fas fa-calendar-times" style="font-size:2rem;margin-bottom:8px;display:block;opacity:.3"></i>No bookings found.</td></tr>
+            <tr><td colspan="11" class="empty-row"><i class="fas fa-calendar-times" style="font-size:2rem;margin-bottom:8px;display:block;opacity:.3"></i>No bookings found.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>
@@ -101,6 +103,8 @@ $activePage = 'admin-bookings';
 .filter-input:focus { outline:none; border-color:var(--red); }
 .record-count { color:var(--silver); font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; }
 .id-badge { color:var(--red); font-weight:600; }
+.ref-badge { color:var(--silver); font-size:.78rem; font-family:monospace; }
+.no-driver { color:var(--silver); font-style:italic; font-size:.8rem; }
 .action-btns { display:flex; gap:6px; align-items:center; }
 .btn-action { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; border:none; cursor:pointer; font-size:.8rem; transition:all .2s; text-decoration:none; }
 .btn-edit { background:rgba(255,255,255,.07); color:var(--silver); }

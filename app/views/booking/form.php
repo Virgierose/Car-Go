@@ -15,21 +15,28 @@ if (empty($_SESSION['booking']['car_id'])) {
     exit;
 }
 
-// ── HANDLE POST: save personal + pickup info to session ───────
+// ── FIXED PICKUP LOCATION (your business address) ─────────────
+// 🔴 Change these to your actual business coordinates and label
+define('FIXED_PICKUP_LAT',  10.6765);
+define('FIXED_PICKUP_LON',  122.9509);
+define('FIXED_PICKUP_LABEL', 'CarGo Main Branch — Bacolod City');
+
+// ── HANDLE POST ───────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['booking']['first_name']       = trim($_POST['first_name']       ?? '');
-    $_SESSION['booking']['last_name']        = trim($_POST['last_name']        ?? '');
-    $_SESSION['booking']['email']            = trim($_POST['email']            ?? '');
-    $_SESSION['booking']['phone']            = trim($_POST['phone']            ?? '');
-    $_SESSION['booking']['pickup_datetime']  = trim($_POST['pickup_datetime']  ?? '');
-    $_SESSION['booking']['return_datetime']  = trim($_POST['return_datetime']  ?? '');
-    $_SESSION['booking']['notes']            = trim($_POST['notes']            ?? '');
-    // ── Map coordinates and distance ──────────────────────────
-    $_SESSION['booking']['pickup_lat']       = trim($_POST['pickup_lat']       ?? '');
-    $_SESSION['booking']['pickup_lon']       = trim($_POST['pickup_lon']       ?? '');
-    $_SESSION['booking']['delivery_lat']     = trim($_POST['delivery_lat']     ?? '');
-    $_SESSION['booking']['delivery_lon']     = trim($_POST['delivery_lon']     ?? '');
-    $_SESSION['booking']['distance_km']      = trim($_POST['distance_km']      ?? '');
+    $_SESSION['booking']['first_name']        = trim($_POST['first_name']        ?? '');
+    $_SESSION['booking']['last_name']         = trim($_POST['last_name']         ?? '');
+    $_SESSION['booking']['email']             = trim($_POST['email']             ?? '');
+    $_SESSION['booking']['phone']             = trim($_POST['phone']             ?? '');
+    $_SESSION['booking']['pickup_datetime']   = trim($_POST['pickup_datetime']   ?? '');
+    $_SESSION['booking']['return_datetime']   = trim($_POST['return_datetime']   ?? '');
+    $_SESSION['booking']['notes']             = trim($_POST['notes']             ?? '');
+    // Fixed pickup is always the branch
+    $_SESSION['booking']['pickup_location']   = FIXED_PICKUP_LABEL;
+    // Destination pinned by user
+    $_SESSION['booking']['destination_label'] = trim($_POST['destination_label'] ?? '');
+    $_SESSION['booking']['destination_lat']   = trim($_POST['destination_lat']   ?? '');
+    $_SESSION['booking']['destination_lon']   = trim($_POST['destination_lon']   ?? '');
+    $_SESSION['booking']['distance_km']       = trim($_POST['distance_km']       ?? '');
     header('Location: ' . BASE_URL . '?page=payment');
     exit;
 }
@@ -37,21 +44,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php include '_booking_styles.php'; ?>
 
-<!-- ── Leaflet CSS (add this if not already in your header.php) ── -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-  #map { height: 380px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 1rem; }
-  .map-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
-  .map-controls button { padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; }
-  #btnSetFrom  { background: #C0392B; color: #fff; }
-  #btnSetFrom:hover { background: #A03225; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3); }
-  #btnSetTo    { background: #C0392B; color: #fff; }
-  #btnSetTo:hover { background: #A03225; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3); }
-  #btnRoute    { background: #C0392B; color: #fff; }
-  #btnRoute:hover { background: #A03225; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3); }
-  #map-status  { font-size: 16px; color: #C0392B; font-weight: 600; margin-bottom: 12px; }
-  .map-info    { display: flex; gap: 24px; font-size: 17px; margin-bottom: 12px; font-weight: 600; }
-  .map-info span strong { color: #C0392B; }
+#map { height:380px; border:1px solid rgba(255,255,255,.1); margin-bottom:1rem; }
+.map-controls { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:.9rem; align-items:center; }
+.map-btn {
+  padding:.6rem 1.1rem; border:none; cursor:pointer; font-size:.8rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; transition:all .2s;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.map-btn-red   { background:var(--crimson,#c0392b); color:#fff; }
+.map-btn-red:hover { background:#a03225; transform:translateY(-1px); box-shadow:0 4px 12px rgba(192,57,43,.4); }
+.map-btn-ghost { background:transparent; color:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.15); }
+.map-btn-ghost:hover { color:#fff; border-color:rgba(255,255,255,.35); }
+#map-status { font-size:.78rem; color:var(--crimson-soft,#e05252); font-weight:600; margin-bottom:.8rem;
+              min-height:1.1rem; }
+.map-info   { display:flex; gap:1.5rem; font-size:.8rem; margin-bottom:.9rem; color:rgba(255,255,255,.5); }
+.map-info span strong { color:#fff; font-family:'Barlow Condensed',sans-serif; font-size:1rem; }
+.dest-preview {
+  background:rgba(192,57,43,.07); border:1px solid rgba(192,57,43,.2);
+  padding:.7rem 1rem; font-size:.8rem; color:rgba(255,255,255,.7);
+  margin-bottom:.9rem; display:none;
+}
+.dest-preview strong { color:var(--crimson-soft,#e05252); }
+.fixed-pickup-badge {
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  padding:.6rem 1rem; font-size:.78rem; color:rgba(255,255,255,.5); margin-bottom:1rem;
+  display:flex; align-items:center; gap:.5rem;
+}
+.fixed-pickup-badge strong { color:rgba(255,255,255,.85); }
 </style>
 
 <div class="bk-hero">
@@ -69,81 +90,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="flow-card">
       <h2>Personal Information</h2>
 
-      <form method="POST" action="<?= BASE_URL ?>?page=booking-form">
+      <form method="POST" action="<?= BASE_URL ?>?page=booking-form" id="booking-form">
 
         <div class="grid-2">
           <div class="form-group">
             <label class="form-label">First Name</label>
             <input type="text" name="first_name" class="form-control"
-              value="<?= htmlspecialchars($_SESSION['user_firstname'] ?? '') ?>" required>
+              value="<?= htmlspecialchars($_SESSION['booking']['first_name'] ?? $_SESSION['client_fname'] ?? '') ?>" required>
           </div>
           <div class="form-group">
             <label class="form-label">Last Name</label>
             <input type="text" name="last_name" class="form-control"
-              value="<?= htmlspecialchars($_SESSION['user_lastname'] ?? '') ?>" required>
+              value="<?= htmlspecialchars($_SESSION['booking']['last_name'] ?? $_SESSION['client_lname'] ?? '') ?>" required>
           </div>
           <div class="form-group">
             <label class="form-label">Email Address</label>
             <input type="email" name="email" class="form-control"
-              value="<?= htmlspecialchars($_SESSION['user_email'] ?? '') ?>" required>
+              value="<?= htmlspecialchars($_SESSION['booking']['email'] ?? $_SESSION['client_email'] ?? '') ?>" required>
           </div>
           <div class="form-group">
             <label class="form-label">Phone Number</label>
-            <input type="tel" name="phone" class="form-control" placeholder="+63 9XX XXX XXXX" required>
+            <input type="tel" name="phone" class="form-control" placeholder="+63 9XX XXX XXXX"
+              value="<?= htmlspecialchars($_SESSION['booking']['phone'] ?? '') ?>" required>
           </div>
         </div>
 
         <hr class="section-divider">
-        <h2 style="margin-bottom:1.4rem;">Pickup & Return Dates</h2>
+        <h2 style="margin-bottom:1.4rem;">Pickup &amp; Return Dates</h2>
 
         <div class="grid-2">
           <div class="form-group">
-            <label class="form-label">Pickup Date & Time</label>
-            <input type="datetime-local" name="pickup_datetime" class="form-control" required>
+            <label class="form-label">Pickup Date &amp; Time</label>
+            <input type="datetime-local" name="pickup_datetime" class="form-control"
+              value="<?= htmlspecialchars($_SESSION['booking']['pickup_datetime'] ?? '') ?>" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Return Date & Time</label>
-            <input type="datetime-local" name="return_datetime" class="form-control" required>
+            <label class="form-label">Return Date &amp; Time</label>
+            <input type="datetime-local" name="return_datetime" class="form-control"
+              value="<?= htmlspecialchars($_SESSION['booking']['return_datetime'] ?? '') ?>" required>
           </div>
         </div>
 
-        <!-- ═══════════════════════════════════════════════════════
-             MAP SECTION — Users pin their pickup and delivery on the map
-             The route + distance/ETA are calculated automatically.
-        ════════════════════════════════════════════════════════ -->
         <hr class="section-divider">
-        <h2 style="margin-bottom:1rem;">📍 Pin Your Location on Map</h2>
-        <p style="font-size:14px; color:#6b7280; margin-bottom:1rem;">
-          Use the map to mark your exact pickup and delivery points.
-          This helps us calculate the distance and estimated travel time.
+        <h2 style="margin-bottom:.6rem;">📍 Set Your Destination</h2>
+        <p style="font-size:.78rem;color:rgba(255,255,255,.4);margin-bottom:1rem;">
+          Your car will be picked up from our branch. Pin your destination on the map so we can calculate the distance.
         </p>
 
-        <!-- Map action buttons -->
+        <!-- Fixed pickup badge -->
+        <div class="fixed-pickup-badge">
+          <span style="color:var(--crimson-soft,#e05252);">🏢</span>
+          <span>Pickup from: <strong><?= htmlspecialchars(FIXED_PICKUP_LABEL) ?></strong></span>
+        </div>
+
+        <!-- Map controls -->
         <div class="map-controls">
-          <button type="button" id="btnSetFrom">📦 Set Pickup Pin</button>
-          <button type="button" id="btnSetTo">🏠 Set Delivery Pin</button>
-          <button type="button" id="btnRoute">🗺️ Calculate Route</button>
+          <button type="button" class="map-btn map-btn-red" id="btnSetDest">
+            📍 Click to Pin Destination
+          </button>
+          <button type="button" class="map-btn map-btn-ghost" id="btnCalcRoute" disabled>
+            🗺 Calculate Distance
+          </button>
+          <button type="button" class="map-btn map-btn-ghost" id="btnClearDest">
+            ✕ Clear Pin
+          </button>
         </div>
 
-        <!-- Status message -->
-        <p id="map-status">Click "Set Pickup Pin" then click on the map to begin.</p>
+        <p id="map-status">Click "Pin Destination" then click on the map.</p>
 
-        <!-- Distance + ETA display -->
         <div class="map-info">
-          <span>📏 Distance: <strong id="distance">--</strong></span>
-          <span>⏱️ ETA: <strong id="eta">--</strong></span>
+          <span>📏 Distance: <strong id="distance">—</strong></span>
+          <span>⏱ ETA: <strong id="eta">—</strong></span>
         </div>
 
-        <!-- The Leaflet map renders here -->
+        <!-- Destination preview -->
+        <div class="dest-preview" id="dest-preview">
+          📍 Destination: <strong id="dest-label-display">—</strong>
+        </div>
+
         <div id="map"></div>
 
-        <!-- Hidden fields — these get submitted with the form -->
-        <input type="hidden" id="pickup_lat"   name="pickup_lat">
-        <input type="hidden" id="pickup_lon"   name="pickup_lon">
-        <input type="hidden" id="delivery_lat" name="delivery_lat">
-        <input type="hidden" id="delivery_lon" name="delivery_lon">
-        <input type="hidden" id="distance_km"  name="distance_km">
-        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- Hidden fields -->
+        <input type="hidden" id="destination_label" name="destination_label">
+        <input type="hidden" id="destination_lat"   name="destination_lat">
+        <input type="hidden" id="destination_lon"   name="destination_lon">
+        <input type="hidden" id="distance_km"       name="distance_km">
 
         <hr class="section-divider">
         <h2 style="margin-bottom:1.4rem;">Additional Notes</h2>
@@ -151,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="form-group">
           <label class="form-label">Special Requests (Optional)</label>
           <textarea name="notes" class="form-control" rows="3"
-            style="resize:vertical;" placeholder="Child seat, airport pickup, accessibility needs…"></textarea>
+            style="resize:vertical;" placeholder="Child seat, airport pickup, accessibility needs…"><?= htmlspecialchars($_SESSION['booking']['notes'] ?? '') ?></textarea>
         </div>
 
         <div class="bk-actions">
@@ -164,263 +195,154 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </section>
 
-<!-- ── Leaflet JS ─────────────────────────────────────────── -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- ── MODEL: stores data + calls routing calculation ────────── -->
 <script>
-class DeliveryModel {
-  constructor() {
-    this.fromCoords  = null;
-    this.toCoords    = null;
-    this.routeCoords = [];
-    this.distanceKm  = 0;
-    this.etaMinutes  = 0;
+document.addEventListener('DOMContentLoaded', function () {
+
+  // ── Fixed pickup coords from PHP ─────────────────────────────
+  var PICKUP_LAT = <?= FIXED_PICKUP_LAT ?>;
+  var PICKUP_LON = <?= FIXED_PICKUP_LON ?>;
+
+  // ── Init map centered on pickup ───────────────────────────────
+  var map = L.map('map').setView([PICKUP_LAT, PICKUP_LON], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  // ── Fixed pickup marker (cannot be moved) ─────────────────────
+  var pickupIcon = L.divIcon({
+    html: '<div style="background:#c0392b;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #c0392b;"></div>',
+    className: '', iconAnchor: [7, 7]
+  });
+  L.marker([PICKUP_LAT, PICKUP_LON], { icon: pickupIcon, interactive: false })
+    .addTo(map)
+    .bindPopup('🏢 <?= addslashes(FIXED_PICKUP_LABEL) ?>')
+    .openPopup();
+
+  // ── State ──────────────────────────────────────────────────────
+  var destMarker  = null;
+  var routeLine   = null;
+  var pinningMode = false;
+  var destCoords  = null;
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function setStatus(msg) { document.getElementById('map-status').textContent = msg; }
+
+  function haversine(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Haversine formula to calculate distance between two coordinates
-  calculateDistance(from, to) {
-    const R = 6371; // Earth's radius in km
-    const dLat = (to.lat - from.lat) * Math.PI / 180;
-    const dLon = (to.lon - from.lon) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(from.lat * Math.PI / 180) * Math.cos(to.lat * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
+  function reverseGeocode(lat, lon, callback) {
+    fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon)
+      .then(function(r){ return r.json(); })
+      .then(function(d){ callback(d.display_name || (lat.toFixed(5) + ', ' + lon.toFixed(5))); })
+      .catch(function(){ callback(lat.toFixed(5) + ', ' + lon.toFixed(5)); });
   }
 
-  async getRoute(from, to) {
-    try {
-      // Calculate straight-line distance (faster, no external API)
-      const distanceKm = this.calculateDistance(from, to);
-      this.distanceKm = distanceKm.toFixed(2);
-      
-      // Estimate time: average speed 40 km/h in city
-      this.etaMinutes = Math.ceil((distanceKm / 40) * 60);
-      
-      // Create a simple route line between the two points
-      this.routeCoords = [[from.lat, from.lon], [to.lat, to.lon]];
-      
-      console.log('Distance calculated:', this.distanceKm, 'km, ETA:', this.etaMinutes, 'min');
-      return this.routeCoords;
-    } catch (error) {
-      console.error('Route calculation error:', error);
-      throw error;
-    }
-  }
-}
-</script>
+  function placeDestPin(lat, lon) {
+    // Remove old marker and route
+    if (destMarker) map.removeLayer(destMarker);
+    if (routeLine)  map.removeLayer(routeLine);
 
-<!-- ── VIEW: manages the Leaflet map display ──────────────── -->
-<script>
-class DeliveryView {
-  constructor() {
-    // 🔴 Change these coordinates to your city's center
-    // Current default: Bacolod City, Philippines
-    this.map = L.map('map').setView([10.6765, 122.9509], 13);
+    var destIcon = L.divIcon({
+      html: '<div style="background:#2ecc71;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #2ecc71;"></div>',
+      className: '', iconAnchor: [7, 7]
+    });
+    destMarker = L.marker([lat, lon], { icon: destIcon }).addTo(map)
+      .bindPopup('📍 Your Destination');
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(this.map);
+    destCoords = { lat: lat, lon: lon };
 
-    this.fromMarker = null;
-    this.toMarker   = null;
-    this.routeLine  = null;
+    // Update hidden fields
+    document.getElementById('destination_lat').value = lat;
+    document.getElementById('destination_lon').value = lon;
+
+    // Reverse geocode to get readable address
+    setStatus('Getting address…');
+    reverseGeocode(lat, lon, function(label) {
+      document.getElementById('destination_label').value = label;
+      document.getElementById('dest-label-display').textContent = label;
+      document.getElementById('dest-preview').style.display = 'block';
+      destMarker.bindPopup('📍 ' + label).openPopup();
+      setStatus('✅ Destination pinned! Click "Calculate Distance" to continue.');
+    });
+
+    // Enable calculate button
+    document.getElementById('btnCalcRoute').disabled = false;
+    document.getElementById('btnCalcRoute').classList.remove('map-btn-ghost');
+    document.getElementById('btnCalcRoute').classList.add('map-btn-red');
   }
 
-  setFromMarker(coords) {
-    if (this.fromMarker) this.map.removeLayer(this.fromMarker);
-    this.fromMarker = L.marker([coords.lat, coords.lon])
-      .addTo(this.map)
-      .bindPopup('📦 Pickup Location')
-      .openPopup();
+  function calcRoute() {
+    if (!destCoords) { setStatus('⚠ Pin your destination first.'); return; }
+    var dist = haversine(PICKUP_LAT, PICKUP_LON, destCoords.lat, destCoords.lon);
+    var eta  = Math.ceil((dist / 40) * 60);
+
+    document.getElementById('distance').textContent = dist.toFixed(2) + ' km';
+    document.getElementById('eta').textContent      = eta + ' min';
+    document.getElementById('distance_km').value    = dist.toFixed(2);
+
+    // Draw route line
+    if (routeLine) map.removeLayer(routeLine);
+    routeLine = L.polyline(
+      [[PICKUP_LAT, PICKUP_LON], [destCoords.lat, destCoords.lon]],
+      { color: '#c0392b', weight: 4, dashArray: '8 6' }
+    ).addTo(map);
+    map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+
+    setStatus('✅ Distance: ' + dist.toFixed(2) + ' km — ETA ~' + eta + ' min');
   }
 
-  setToMarker(coords) {
-    if (this.toMarker) this.map.removeLayer(this.toMarker);
-    this.toMarker = L.marker([coords.lat, coords.lon])
-      .addTo(this.map)
-      .bindPopup('🏠 Delivery Location')
-      .openPopup();
-  }
-
-  displayRoute(routeCoords) {
-    if (this.routeLine) this.map.removeLayer(this.routeLine);
-    this.routeLine = L.polyline(routeCoords, {
-      color: '#C0392B',  // red line — matches theme
-      weight: 5
-    }).addTo(this.map);
-    this.map.fitBounds(this.routeLine.getBounds());
-  }
-
-  updateInfo(distanceKm, etaMinutes) {
-    document.getElementById('distance').textContent = distanceKm + ' km';
-    document.getElementById('eta').textContent      = etaMinutes + ' min';
-  }
-
-  updateStatus(msg) {
-    document.getElementById('map-status').textContent = msg;
-  }
-}
-</script>
-
-<!-- ── CONTROLLER: wires buttons + map clicks together ─────── -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('=== Booking Form Script Loaded ===');
-
-  // Check if hidden fields exist
-  const requiredFields = ['pickup_lat', 'pickup_lon', 'delivery_lat', 'delivery_lon', 'distance_km'];
-  requiredFields.forEach(fieldId => {
-    const field = document.getElementById(fieldId);
-    console.log('Field ' + fieldId + ':', field ? 'FOUND ✓' : 'NOT FOUND ✗');
+  // ── Button: Pin Destination ───────────────────────────────────
+  document.getElementById('btnSetDest').addEventListener('click', function () {
+    pinningMode = true;
+    map.getContainer().style.cursor = 'crosshair';
+    setStatus('Click anywhere on the map to pin your destination.');
   });
 
-  const model = new DeliveryModel();
-  console.log('DeliveryModel instance created');
+  // ── Button: Calculate ─────────────────────────────────────────
+  document.getElementById('btnCalcRoute').addEventListener('click', calcRoute);
 
-  const view  = new DeliveryView();
-  console.log('DeliveryView instance created - Map initialized');
-
-  let pinMode = null; // tracks which pin we're placing next
-
-  console.log('Attaching event listeners...');
-
-  // "Set Pickup Pin" button
-  const btnSetFrom = document.getElementById('btnSetFrom');
-  if (btnSetFrom) {
-    btnSetFrom.addEventListener('click', () => {
-      console.log('Set Pickup Pin button clicked');
-      pinMode = 'from';
-      view.updateStatus('Click anywhere on the map to set the PICKUP location.');
-    });
-    console.log('btnSetFrom listener attached ✓');
-  } else {
-    console.error('btnSetFrom button NOT FOUND');
-  }
-
-  // "Set Delivery Pin" button
-  const btnSetTo = document.getElementById('btnSetTo');
-  if (btnSetTo) {
-    btnSetTo.addEventListener('click', () => {
-      console.log('Set Delivery Pin button clicked');
-      pinMode = 'to';
-      view.updateStatus('Click anywhere on the map to set the DELIVERY location.');
-    });
-    console.log('btnSetTo listener attached ✓');
-  } else {
-    console.error('btnSetTo button NOT FOUND');
-  }
-
-  // Map click — places the active pin
-  view.map.on('click', (e) => {
-    console.log('Map clicked at:', e.latlng);
-    const coords = { lat: e.latlng.lat, lon: e.latlng.lng };
-    console.log('Coordinates object:', coords);
-
-    if (pinMode === 'from') {
-      console.log('Setting pickup coordinates');
-      model.fromCoords = coords;
-      view.setFromMarker(coords);
-      // Save to hidden fields for PHP form submission
-      document.getElementById('pickup_lat').value = coords.lat;
-      document.getElementById('pickup_lon').value = coords.lon;
-      console.log('Pickup lat:', coords.lat, 'Pickup lon:', coords.lon);
-      view.updateStatus('✅ Pickup pinned! Now click "Set Delivery Pin".');
-
-    } else if (pinMode === 'to') {
-      console.log('Setting delivery coordinates');
-      model.toCoords = coords;
-      view.setToMarker(coords);
-      // Save to hidden fields
-      document.getElementById('delivery_lat').value = coords.lat;
-      document.getElementById('delivery_lon').value = coords.lon;
-      console.log('Delivery lat:', coords.lat, 'Delivery lon:', coords.lon);
-      view.updateStatus('✅ Delivery pinned! Click "Calculate Route" to see the path.');
-    } else {
-      console.log('Map clicked but no pin mode active');
-    }
-
-    pinMode = null; // reset mode after placing pin
+  // ── Button: Clear ─────────────────────────────────────────────
+  document.getElementById('btnClearDest').addEventListener('click', function () {
+    if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
+    if (routeLine)  { map.removeLayer(routeLine);  routeLine  = null; }
+    destCoords = null;
+    document.getElementById('destination_lat').value   = '';
+    document.getElementById('destination_lon').value   = '';
+    document.getElementById('destination_label').value = '';
+    document.getElementById('distance_km').value       = '';
+    document.getElementById('distance').textContent    = '—';
+    document.getElementById('eta').textContent         = '—';
+    document.getElementById('dest-preview').style.display = 'none';
+    document.getElementById('btnCalcRoute').disabled   = true;
+    document.getElementById('btnCalcRoute').classList.add('map-btn-ghost');
+    document.getElementById('btnCalcRoute').classList.remove('map-btn-red');
+    setStatus('Click "Pin Destination" then click on the map.');
   });
 
-  // "Calculate Route" button
-  const btnRoute = document.getElementById('btnRoute');
-  if (btnRoute) {
-    btnRoute.addEventListener('click', () => {
-      console.log('Calculate Route clicked');
-      console.log('From Coords:', model.fromCoords);
-      console.log('To Coords:', model.toCoords);
-      
-      if (!model.fromCoords) {
-        view.updateStatus('⚠️ Please set the PICKUP pin first!');
-        return;
-      }
-      
-      if (!model.toCoords) {
-        view.updateStatus('⚠️ Please set the DELIVERY pin first!');
-        return;
-      }
-      
-      if (!model.fromCoords.lat || !model.fromCoords.lon || !model.toCoords.lat || !model.toCoords.lon) {
-        view.updateStatus('⚠️ Invalid pin locations. Please try again.');
-        return;
-      }
-      
-      view.updateStatus('Calculating distance…');
-      
-      try {
-        const distanceKm = model.calculateDistance(model.fromCoords, model.toCoords);
-        console.log('Calculated distance:', distanceKm);
-        
-        model.distanceKm = parseFloat(distanceKm).toFixed(2);
-        model.etaMinutes = Math.ceil((model.distanceKm / 40) * 60);
-        model.routeCoords = [[model.fromCoords.lat, model.fromCoords.lon], [model.toCoords.lat, model.toCoords.lon]];
-        
-        console.log('Distance:', model.distanceKm, 'ETA:', model.etaMinutes);
-        
-        view.displayRoute(model.routeCoords);
-        view.updateInfo(model.distanceKm, model.etaMinutes);
-        
-        const distEl = document.getElementById('distance_km');
-        if (distEl) {
-          distEl.value = model.distanceKm;
-          console.log('Hidden field value set to:', distEl.value);
-        } else {
-          console.error('distance_km hidden field not found');
-        }
-        
-        view.updateStatus('✅ Route calculated! Distance: ' + model.distanceKm + ' km | ETA: ' + model.etaMinutes + ' min');
-      } catch (err) {
-        console.error('Error:', err);
-        view.updateStatus('❌ Error calculating distance: ' + err.message);
-      }
-    });
-    console.log('btnRoute listener attached ✓');
-  } else {
-    console.error('btnRoute button NOT FOUND');
-  }
+  // ── Map click ─────────────────────────────────────────────────
+  map.on('click', function (e) {
+    if (!pinningMode) return;
+    pinningMode = false;
+    map.getContainer().style.cursor = '';
+    placeDestPin(e.latlng.lat, e.latlng.lng);
+  });
 
-  console.log('=== All listeners attached ===');
-
-  // Form validation
-  const form = document.querySelector('form');
-  if (form) {
-    form.addEventListener('submit', function(event) {
-      const distanceKm = document.getElementById('distance_km').value;
-      console.log('Form validation - distance_km value:', distanceKm);
-      
-      if (!distanceKm || parseFloat(distanceKm) === 0 || distanceKm === '') {
-        event.preventDefault();
-        alert('⚠️ Please pin your pickup and delivery locations on the map and calculate the route before continuing.');
-        return false;
-      }
-      return true;
-    });
-    console.log('Form validation attached ✓');
-  }
+  // ── Form submit validation ────────────────────────────────────
+  document.getElementById('booking-form').addEventListener('submit', function (e) {
+    var dist = document.getElementById('distance_km').value;
+    if (!dist || parseFloat(dist) === 0) {
+      e.preventDefault();
+      alert('⚠ Please pin your destination on the map and calculate the distance before continuing.');
+    }
+  });
 
 });
 </script>

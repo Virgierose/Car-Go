@@ -11,9 +11,9 @@ class Database {
     private mysqli $connection;
 
     private string $host     = 'localhost';
-    private string $username = 'root';
-    private string $password = '';
-    private string $database = 'cargo_db';
+    private string $username = 'u970217706_cargo';
+    private string $password = 'a4b3c2d1_GMP';
+    private string $database = 'u970217706_cargo';
     private int    $port     = 3306;
 
     private function __construct() {

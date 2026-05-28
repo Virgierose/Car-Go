@@ -29,27 +29,27 @@ class AdminController {
         $carsResult   = $this->db->query("SELECT COUNT(*) as c FROM tbl_car");
         $totalCars    = (int) $carsResult->fetch_assoc()['c'];
 
-        $bookingsResult = $this->db->query("SELECT COUNT(*) as c FROM tbl_booking");
+        $bookingsResult = $this->db->query("SELECT COUNT(*) as c FROM tbl_rental");
         $totalBookings  = (int) $bookingsResult->fetch_assoc()['c'];
 
         $driversResult = $this->db->query("SELECT COUNT(*) as c FROM tbl_driver WHERE driver_status = 'available'");
         $totalDrivers  = (int) $driversResult->fetch_assoc()['c'];
 
-        $revenueResult = $this->db->query("SELECT COALESCE(SUM(amount),0) as total FROM tbl_payment WHERE payment_status = 'paid'");
+        $revenueResult = $this->db->query("SELECT COALESCE(SUM(total_amount),0) as total FROM tbl_rental WHERE rental_status = 'completed'");
         $totalRevenue  = (float) $revenueResult->fetch_assoc()['total'];
 
         $rbResult = $this->db->query("
-            SELECT b.*,
+            SELECT r.*,
                    c.clnt_fname, c.clnt_lname,
                    d.drvr_fname, d.drvr_lname,
                    cm.model_name,
                    ca.plate_number
-            FROM tbl_booking b
-            JOIN tbl_client    c  ON b.client_id = c.client_id
-            JOIN tbl_driver    d  ON b.driver_id = d.driver_id
-            JOIN tbl_car       ca ON b.car_id    = ca.car_id
-            JOIN tbl_car_model cm ON ca.model_id = cm.model_id
-            ORDER BY b.booking_dateAdded DESC
+            FROM tbl_rental r
+            LEFT JOIN tbl_client    c  ON r.client_id = c.client_id
+            LEFT JOIN tbl_driver    d  ON r.driver_id = d.driver_id
+            LEFT JOIN tbl_car       ca ON r.car_id    = ca.car_id
+            LEFT JOIN tbl_car_model cm ON ca.model_id = cm.model_id
+            ORDER BY r.date_created DESC
             LIMIT 10
         ");
         $recentBookings = $rbResult ? $rbResult->fetch_all(MYSQLI_ASSOC) : [];
@@ -288,8 +288,8 @@ class AdminController {
 
         $id    = (int)($_POST['car_id'] ?? 0);
         $check = $this->db->prepare("
-            SELECT COUNT(*) as c FROM tbl_booking
-            WHERE car_id = ? AND bkng_status IN ('pending','confirmed')
+            SELECT COUNT(*) as c FROM tbl_rental
+            WHERE car_id = ? AND rental_status IN ('pending','confirmed')
         ");
         $check->bind_param('i', $id);
         $check->execute();
@@ -329,25 +329,101 @@ class AdminController {
     }
 
     // ─────────────────────────────────────────
-    //  BOOKINGS
+    //  BOOKINGS  ← FIXED: now reads tbl_rental
     // ─────────────────────────────────────────
     public function bookings() {
         $this->requireAdmin();
 
-        $result = $this->db->query("
-            SELECT b.*,
+        $activeTab = $_GET['status']    ?? 'All';
+        $search    = trim($_GET['search']    ?? '');
+        $dateFrom  = trim($_GET['date_from'] ?? '');
+        $dateTo    = trim($_GET['date_to']   ?? '');
+
+        $sql = "
+            SELECT r.*,
                    c.clnt_fname, c.clnt_lname,
+                   cm.model_name,
                    ca.plate_number,
                    d.drvr_fname, d.drvr_lname
-            FROM tbl_booking b
-            LEFT JOIN tbl_client c  ON b.client_id = c.client_id
-            LEFT JOIN tbl_car    ca ON b.car_id    = ca.car_id
-            LEFT JOIN tbl_driver d  ON b.driver_id = d.driver_id
-            ORDER BY b.booking_dateAdded DESC
-        ");
-        $bookings = $result->fetch_all(MYSQLI_ASSOC);
+            FROM tbl_rental r
+            LEFT JOIN tbl_client    c  ON r.client_id = c.client_id
+            LEFT JOIN tbl_car       ca ON r.car_id    = ca.car_id
+            LEFT JOIN tbl_car_model cm ON ca.model_id = cm.model_id
+            LEFT JOIN tbl_driver    d  ON r.driver_id = d.driver_id
+            WHERE 1=1
+        ";
+
+        $params = [];
+        $types  = '';
+
+        if ($activeTab && $activeTab !== 'All') {
+            $sql    .= " AND r.rental_status = ?";
+            $types  .= 's';
+            $params[] = strtolower($activeTab);
+        }
+
+        if ($search !== '') {
+            $sql    .= " AND (
+                c.clnt_fname    LIKE ? OR
+                c.clnt_lname    LIKE ? OR
+                cm.model_name   LIKE ? OR
+                ca.plate_number LIKE ? OR
+                d.drvr_fname    LIKE ? OR
+                d.drvr_lname    LIKE ?
+            )";
+            $like    = '%' . $search . '%';
+            $types  .= 'ssssss';
+            array_push($params, $like, $like, $like, $like, $like, $like);
+        }
+
+        if ($dateFrom !== '') {
+            $sql    .= " AND DATE(r.rental_start) >= ?";
+            $types  .= 's';
+            $params[] = $dateFrom;
+        }
+        if ($dateTo !== '') {
+            $sql    .= " AND DATE(r.rental_end) <= ?";
+            $types  .= 's';
+            $params[] = $dateTo;
+        }
+
+        $sql .= " ORDER BY r.date_created DESC";
+
+        $stmt = $this->db->prepare($sql);
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        $bookings = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
 
         renderAdmin('admin/bookings/index', compact('bookings'));
+    }
+
+    // Status update handler
+    public function bookingStatus() {
+        $this->requireAdmin();
+
+        $id      = (int)($_POST['booking_id'] ?? 0);
+        $status  = strtolower($_POST['status'] ?? '');
+        $allowed = ['pending', 'confirmed', 'cancelled', 'completed'];
+
+        if ($id && in_array($status, $allowed, true)) {
+            $stmt = $this->db->prepare("UPDATE tbl_rental SET rental_status = ? WHERE rental_id = ?");
+            $stmt->bind_param('si', $status, $id);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        $qs = http_build_query(array_filter([
+            'page'      => 'admin-bookings',
+            'status'    => $_POST['current_tab'] ?? null,
+            'search'    => $_POST['search']      ?? null,
+            'date_from' => $_POST['date_from']   ?? null,
+            'date_to'   => $_POST['date_to']     ?? null,
+        ]));
+        header('Location: ' . BASE_URL . '?' . $qs);
+        exit;
     }
 
     // ─────────────────────────────────────────
@@ -477,8 +553,8 @@ class AdminController {
 
         $id    = (int)($_POST['id'] ?? 0);
         $check = $this->db->prepare("
-            SELECT COUNT(*) as c FROM tbl_booking
-            WHERE driver_id = ? AND bkng_status IN ('pending','confirmed','ongoing')
+            SELECT COUNT(*) as c FROM tbl_rental
+            WHERE driver_id = ? AND rental_status IN ('pending','confirmed')
         ");
         $check->bind_param('i', $id);
         $check->execute();
@@ -504,9 +580,9 @@ class AdminController {
         $this->requireAdmin();
 
         $result = $this->db->query("
-            SELECT c.*, COUNT(b.booking_id) as total_bookings
+            SELECT c.*, COUNT(r.rental_id) as total_bookings
             FROM tbl_client c
-            LEFT JOIN tbl_booking b ON c.client_id = b.client_id
+            LEFT JOIN tbl_rental r ON c.client_id = r.client_id
             WHERE c.role = 'client'
             GROUP BY c.client_id
             ORDER BY c.client_dateAdded DESC

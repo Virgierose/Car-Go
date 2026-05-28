@@ -2,45 +2,173 @@
 
 class Booking {
 
-    
-    private static array $bookings = [
-        ['ref'=>'CARGO-A1B2C3D4', 'customer'=>'Juan dela Cruz',    'vehicle'=>'Toyota Fortuner',   'pickup'=>'Apr 5',  'return'=>'Apr 7',  'amount'=>5000, 'status'=>'active'],
-        ['ref'=>'CARGO-E5F6G7H8', 'customer'=>'Maria Santos',      'vehicle'=>'Honda Civic',        'pickup'=>'Mar 20', 'return'=>'Mar 22', 'amount'=>3600, 'status'=>'completed'],
-        ['ref'=>'CARGO-I9J0K1L2', 'customer'=>'Pedro Reyes',       'vehicle'=>'Toyota Hi-Ace',      'pickup'=>'Mar 10', 'return'=>'Mar 12', 'amount'=>6400, 'status'=>'completed'],
-        ['ref'=>'CARGO-M3N4O5P6', 'customer'=>'Anna Cruz',         'vehicle'=>'Ford Ranger',        'pickup'=>'Feb 14', 'return'=>'Feb 15', 'amount'=>2200, 'status'=>'completed'],
-        ['ref'=>'CARGO-Q7R8S9T0', 'customer'=>'Jose Garcia',       'vehicle'=>'Mitsubishi Xpander', 'pickup'=>'Jan 28', 'return'=>'Jan 30', 'amount'=>4000, 'status'=>'cancelled'],
-        ['ref'=>'CARGO-C3D4E5F6', 'customer'=>'Linda Reyes',       'vehicle'=>'Toyota Vios',        'pickup'=>'Apr 6',  'return'=>'Apr 8',  'amount'=>3000, 'status'=>'pending'],
-    ];
-
-   
-    public static function all(): array {
-        return self::$bookings;
+    private static function db(): PDO {
+        return Database::getInstance()->getConnection();
     }
 
-    
-    public static function forClient(): array {
-        return self::$bookings;
+    /**
+     * Fetch all bookings with optional filters.
+     */
+    public static function all(
+        ?string $status   = null,
+        ?string $search   = null,
+        ?string $dateFrom = null,
+        ?string $dateTo   = null
+    ): array {
+        $sql = "
+            SELECT
+                b.booking_id,
+                b.pickup_date,
+                b.return_date,
+                b.num_days,
+                b.total_price,
+                b.bkng_status,
+                c.clnt_fname,
+                c.clnt_lname,
+                ca.model_name,
+                ca.plate_number,
+                d.drvr_fname,
+                d.drvr_lname
+            FROM bookings b
+            JOIN clients c  ON b.client_id = c.client_id
+            JOIN cars ca    ON b.car_id    = ca.car_id
+            JOIN drivers d  ON b.driver_id = d.driver_id
+            WHERE 1=1
+        ";
+
+        $params = [];
+
+        if ($status && $status !== 'All') {
+            $sql .= " AND b.bkng_status = :status";
+            $params[':status'] = $status;
+        }
+
+        if ($search) {
+            $sql .= " AND (
+                c.clnt_fname    LIKE :search OR
+                c.clnt_lname    LIKE :search OR
+                ca.model_name   LIKE :search OR
+                ca.plate_number LIKE :search OR
+                d.drvr_fname    LIKE :search OR
+                d.drvr_lname    LIKE :search
+            )";
+            $params[':search'] = '%' . $search . '%';
+        }
+
+        if ($dateFrom) {
+            $sql .= " AND b.pickup_date >= :date_from";
+            $params[':date_from'] = $dateFrom;
+        }
+
+        if ($dateTo) {
+            $sql .= " AND b.return_date <= :date_to";
+            $params[':date_to'] = $dateTo;
+        }
+
+        $sql .= " ORDER BY b.booking_id DESC";
+
+        $stmt = self::db()->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-   
+    /**
+     * Fetch bookings for a specific client (user-facing).
+     */
+    public static function forClient(int $clientId): array {
+        $stmt = self::db()->prepare("
+            SELECT
+                b.booking_id,
+                b.pickup_date,
+                b.return_date,
+                b.num_days,
+                b.total_price,
+                b.bkng_status,
+                ca.model_name,
+                ca.plate_number,
+                d.drvr_fname,
+                d.drvr_lname
+            FROM bookings b
+            JOIN cars    ca ON b.car_id    = ca.car_id
+            JOIN drivers d  ON b.driver_id = d.driver_id
+            WHERE b.client_id = :client_id
+            ORDER BY b.booking_id DESC
+        ");
+        $stmt->execute([':client_id' => $clientId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Fetch only pending bookings.
+     */
     public static function pending(): array {
-        return array_filter(self::$bookings, fn($b) => $b['status'] === 'pending');
+        return self::all('Pending');
     }
 
-   
-    public static function generateRef(): string {
-        return 'CARGO-' . strtoupper(substr(md5(time()), 0, 8));
-    }
-
-    
+    /**
+     * Get aggregate stats for the admin dashboard.
+     */
     public static function stats(): array {
-        $all = self::$bookings;
-        return [
-            'total'     => count($all),
-            'active'    => count(array_filter($all, fn($b) => $b['status'] === 'active')),
-            'completed' => count(array_filter($all, fn($b) => $b['status'] === 'completed')),
-            'pending'   => count(array_filter($all, fn($b) => $b['status'] === 'pending')),
-            'revenue'   => array_sum(array_column($all, 'amount')),
-        ];
+        $stmt = self::db()->query("
+            SELECT
+                COUNT(*)                             AS total,
+                SUM(bkng_status = 'Active')          AS active,
+                SUM(bkng_status = 'Completed')       AS completed,
+                SUM(bkng_status = 'Pending')         AS pending,
+                COALESCE(SUM(total_price), 0)        AS revenue
+            FROM bookings
+        ");
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Update the status of a booking.
+     */
+    public static function updateStatus(int $bookingId, string $status): bool {
+        $allowed = ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled'];
+        if (!in_array($status, $allowed, true)) {
+            return false;
+        }
+        $stmt = self::db()->prepare("
+            UPDATE bookings SET bkng_status = :status WHERE booking_id = :id
+        ");
+        return $stmt->execute([':status' => $status, ':id' => $bookingId]);
+    }
+
+    /**
+     * Find a single booking by ID.
+     */
+    public static function find(int $bookingId): ?array {
+        $stmt = self::db()->prepare("
+            SELECT
+                b.booking_id,
+                b.pickup_date,
+                b.return_date,
+                b.num_days,
+                b.total_price,
+                b.bkng_status,
+                c.clnt_fname,
+                c.clnt_lname,
+                ca.model_name,
+                ca.plate_number,
+                d.drvr_fname,
+                d.drvr_lname
+            FROM bookings b
+            JOIN clients c  ON b.client_id = c.client_id
+            JOIN cars ca    ON b.car_id    = ca.car_id
+            JOIN drivers d  ON b.driver_id = d.driver_id
+            WHERE b.booking_id = :id
+            LIMIT 1
+        ");
+        $stmt->execute([':id' => $bookingId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    /**
+     * Generate a unique booking reference code.
+     */
+    public static function generateRef(): string {
+        return 'CARGO-' . strtoupper(substr(md5(uniqid('', true)), 0, 8));
     }
 }

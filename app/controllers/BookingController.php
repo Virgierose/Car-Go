@@ -88,7 +88,6 @@ class BookingController {
                 foreach ($availableDrivers as $d) {
                     if ((int)$d['id'] === $chosen_id) {
                         $driver_name = $d['name'];
-                        // Use DB fee if available, otherwise fall back to 500
                         $driver_fee  = isset($d['fee']) ? (float)$d['fee'] : 500;
                         break;
                     }
@@ -149,24 +148,27 @@ class BookingController {
 
         // Handle POST: validate, save personal + pickup info, advance to step 4
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $first_name      = trim($_POST['first_name']      ?? '');
-            $last_name       = trim($_POST['last_name']       ?? '');
-            $email           = trim($_POST['email']           ?? '');
-            $phone           = trim($_POST['phone']           ?? '');
-            $pickup_location = trim($_POST['pickup_location'] ?? '');
-            $return_location = trim($_POST['return_location'] ?? '');
-            $pickup_datetime = trim($_POST['pickup_datetime'] ?? '');
-            $return_datetime = trim($_POST['return_datetime'] ?? '');
-            $notes           = trim($_POST['notes']           ?? '');
+            $first_name         = trim($_POST['first_name']         ?? '');
+            $last_name          = trim($_POST['last_name']          ?? '');
+            $email              = trim($_POST['email']              ?? '');
+            $phone              = trim($_POST['phone']              ?? '');
+            $pickup_datetime    = trim($_POST['pickup_datetime']    ?? '');
+            $return_datetime    = trim($_POST['return_datetime']    ?? '');
+            $notes              = trim($_POST['notes']              ?? '');
+            $destination_label  = trim($_POST['destination_label']  ?? '');
+            $destination_lat    = trim($_POST['destination_lat']    ?? '');
+            $destination_lon    = trim($_POST['destination_lon']    ?? '');
+            $distance_km        = trim($_POST['distance_km']        ?? '');
 
             // Basic validation
-            if ($first_name === '')      $errors[] = 'First name is required.';
-            if ($last_name === '')       $errors[] = 'Last name is required.';
+            if ($first_name === '')        $errors[] = 'First name is required.';
+            if ($last_name === '')         $errors[] = 'Last name is required.';
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'A valid email is required.';
-            if ($phone === '')           $errors[] = 'Phone number is required.';
-            if ($pickup_location === '') $errors[] = 'Pickup location is required.';
-            if ($pickup_datetime === '') $errors[] = 'Pickup date & time is required.';
-            if ($return_datetime === '') $errors[] = 'Return date & time is required.';
+            if ($phone === '')             $errors[] = 'Phone number is required.';
+            if ($pickup_datetime === '')   $errors[] = 'Pickup date & time is required.';
+            if ($return_datetime === '')   $errors[] = 'Return date & time is required.';
+            if ($distance_km === '' || (float)$distance_km <= 0)
+                                           $errors[] = 'Please pin your destination on the map and calculate the distance.';
 
             // Validate return is after pickup
             if ($pickup_datetime !== '' && $return_datetime !== '') {
@@ -176,15 +178,18 @@ class BookingController {
             }
 
             if (empty($errors)) {
-                $_SESSION['booking']['first_name']      = $first_name;
-                $_SESSION['booking']['last_name']       = $last_name;
-                $_SESSION['booking']['email']           = $email;
-                $_SESSION['booking']['phone']           = $phone;
-                $_SESSION['booking']['pickup_location'] = $pickup_location;
-                $_SESSION['booking']['return_location'] = $return_location !== '' ? $return_location : $pickup_location;
-                $_SESSION['booking']['pickup_datetime'] = $pickup_datetime;
-                $_SESSION['booking']['return_datetime'] = $return_datetime;
-                $_SESSION['booking']['notes']           = $notes;
+                $_SESSION['booking']['first_name']        = $first_name;
+                $_SESSION['booking']['last_name']         = $last_name;
+                $_SESSION['booking']['email']             = $email;
+                $_SESSION['booking']['phone']             = $phone;
+                $_SESSION['booking']['pickup_datetime']   = $pickup_datetime;
+                $_SESSION['booking']['return_datetime']   = $return_datetime;
+                $_SESSION['booking']['notes']             = $notes;
+                $_SESSION['booking']['pickup_location']   = 'CarGo Main Branch — Bacolod City';
+                $_SESSION['booking']['destination_label'] = $destination_label;
+                $_SESSION['booking']['destination_lat']   = $destination_lat;
+                $_SESSION['booking']['destination_lon']   = $destination_lon;
+                $_SESSION['booking']['distance_km']       = $distance_km;
 
                 header('Location: ' . BASE_URL . '?page=payment');
                 exit;
@@ -232,20 +237,23 @@ class BookingController {
                           ? (int) $bk['driver_id']
                           : null;
 
-            $pickup_dt  = $bk['pickup_datetime']  ?? '';
-            $return_dt  = $bk['return_datetime']  ?? '';
-            $pickup_loc = $bk['pickup_location']  ?? '';
-            $days       = max(1, (int)   ($bk['days']  ?? 1));
-            $total      = (float) ($bk['total']   ?? 0);
-            $notes      = $bk['notes']            ?? '';
+            $pickup_dt    = $bk['pickup_datetime']   ?? '';
+            $return_dt    = $bk['return_datetime']   ?? '';
+            $pickup_loc   = $bk['pickup_location']   ?? '';
+            $dest_address = $bk['destination_label'] ?? '';
+            $dest_lat     = !empty($bk['destination_lat']) ? (float) $bk['destination_lat'] : null;
+            $dest_lon     = !empty($bk['destination_lon']) ? (float) $bk['destination_lon'] : null;
+            $distance_km  = !empty($bk['distance_km'])     ? (float) $bk['distance_km']     : null;
+            $days         = max(1, (int)   ($bk['days']  ?? 1));
+            $total        = (float) ($bk['total']   ?? 0);
+            $notes        = $bk['notes']            ?? '';
 
-            // COD = pending (needs manual confirmation), anything else = confirmed
+            // COD = pending, anything else = confirmed
             $status = ($payment_method === 'cod') ? 'pending' : 'confirmed';
 
             // Generate unique reference code
             do {
                 $ref = 'CRG-' . strtoupper(substr(md5(uniqid('', true)), 0, 6));
-                // Check uniqueness (optional but good practice)
                 $chk = $db->prepare("SELECT booking_ref FROM tbl_rental WHERE booking_ref = ? LIMIT 1");
                 $chk->bind_param('s', $ref);
                 $chk->execute();
@@ -255,41 +263,43 @@ class BookingController {
             } while ($exists);
 
             /*
-             * tbl_rental columns (13 total, date_created uses NOW()):
+             * tbl_rental columns (16 placeholders + NOW()):
              *   client_id      → i
              *   car_id         → i
-             *   driver_id      → i  (nullable — use bind_param with null)
+             *   driver_id      → i  (nullable)
              *   rental_start   → s
              *   rental_end     → s
              *   total_days     → i
              *   total_amount   → d
              *   pickup_address → s
+             *   dest_address   → s
+             *   dest_lat       → d  (nullable)
+             *   dest_lon       → d  (nullable)
+             *   distance_km    → d  (nullable)
              *   payment_method → s
              *   rental_status  → s
              *   booking_ref    → s
              *   notes          → s
-             *   date_created   → NOW()  (no placeholder)
+             *   date_created   → NOW() (no placeholder)
              *
-             * Type string: i i i s s i d s s s s s  → 'iiissidsssss' (12 chars, 12 placeholders)
+             * Type string: 'iiissidsdddsssss' → 'iiissidsdddssss s'
              */
             $stmt = $db->prepare("
                 INSERT INTO tbl_rental
                     (client_id, car_id, driver_id,
                      rental_start, rental_end, total_days, total_amount,
-                     pickup_address,
+                     pickup_address, dest_address, dest_lat, dest_lon, distance_km,
                      payment_method, rental_status, booking_ref, notes, date_created)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
 
             if (!$stmt) {
                 $db_error = 'Query prepare failed: ' . $db->error;
             } else {
-                // MySQLi does not natively bind NULL through bind_param for ints.
-                // Use a local variable that can be set to null.
                 $driver_id_bind = $driver_id; // null or int
 
                 $stmt->bind_param(
-                    'iiissidsssss',
+                    'iiissidsdddsssss',
                     $uid,
                     $car_id,
                     $driver_id_bind,
@@ -298,6 +308,10 @@ class BookingController {
                     $days,
                     $total,
                     $pickup_loc,
+                    $dest_address,
+                    $dest_lat,
+                    $dest_lon,
+                    $distance_km,
                     $payment_method,
                     $status,
                     $ref,
@@ -309,12 +323,14 @@ class BookingController {
 
                     // Store confirmation data for the next page
                     $_SESSION['booking_confirmed'] = [
-                        'ref'     => $ref,
-                        'vehicle' => $bk['car_name']    ?? '—',
-                        'pickup'  => $pickup_dt,
-                        'return'  => $return_dt,
-                        'driver'  => $bk['driver_name'] ?? 'Self-Drive',
-                        'total'   => '₱' . number_format($total, 2),
+                        'ref'         => $ref,
+                        'vehicle'     => $bk['car_name']          ?? '—',
+                        'pickup'      => $pickup_dt,
+                        'return'      => $return_dt,
+                        'driver'      => $bk['driver_name']       ?? 'Self-Drive',
+                        'destination' => $dest_address,
+                        'distance'    => $distance_km ? $distance_km . ' km' : '—',
+                        'total'       => '₱' . number_format($total, 2),
                     ];
 
                     // Clear the in-progress booking session
@@ -332,13 +348,15 @@ class BookingController {
 
         // Build order summary for display
         $summary = [
-            'vehicle'    => $bk['car_name']    ?? '—',
-            'days'       => max(1, (int)   ($bk['days']       ?? 1)),
-            'rate'       => (float) ($bk['car_price']  ?? 0),
-            'driver'     => $bk['with_driver']  ?? false,
-            'driver_fee' => (float) ($bk['driver_fee'] ?? 0),
-            'total'      => (float) ($bk['total']      ?? 0),
-            'trip_type'  => $bk['trip_type']    ?? 'perday',
+            'vehicle'     => $bk['car_name']          ?? '—',
+            'days'        => max(1, (int) ($bk['days']       ?? 1)),
+            'rate'        => (float) ($bk['car_price']  ?? 0),
+            'driver'      => $bk['with_driver']         ?? false,
+            'driver_fee'  => (float) ($bk['driver_fee'] ?? 0),
+            'total'       => (float) ($bk['total']      ?? 0),
+            'trip_type'   => $bk['trip_type']           ?? 'perday',
+            'destination' => $bk['destination_label']   ?? '—',
+            'distance'    => $bk['distance_km']         ?? '—',
         ];
 
         render('booking/payment', [
@@ -370,11 +388,13 @@ class BookingController {
             'step' => 5,
             'ref'  => $confirmed['ref'] ?? 'CRG-XXXXXX',
             'summary' => [
-                'vehicle' => $confirmed['vehicle'] ?? '—',
-                'pickup'  => $confirmed['pickup']  ?? '—',
-                'return'  => $confirmed['return']  ?? '—',
-                'driver'  => $confirmed['driver']  ?? 'Self-Drive',
-                'total'   => $confirmed['total']   ?? '₱0.00',
+                'vehicle'     => $confirmed['vehicle']     ?? '—',
+                'pickup'      => $confirmed['pickup']      ?? '—',
+                'return'      => $confirmed['return']      ?? '—',
+                'driver'      => $confirmed['driver']      ?? 'Self-Drive',
+                'destination' => $confirmed['destination'] ?? '—',
+                'distance'    => $confirmed['distance']    ?? '—',
+                'total'       => $confirmed['total']       ?? '₱0.00',
             ],
         ]);
     }

@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <select class="form-control" id="car-select">
             <?php if(!empty($cars)): ?>
               <?php foreach ($cars as $car): ?>
-                <option value="<?= 0 ?>" data-id="<?= (int)$car['car_id'] ?>" data-name="<?= htmlspecialchars($car['brand'] . ' ' . $car['model_name']) ?>" data-image="<?= htmlspecialchars($car['image'] ?? '') ?>">
-                  <?= htmlspecialchars($car['brand'] . ' ' . $car['model_name']) ?> — ₱0/day
+                <option value="<?= (float)$car['daily_rate'] ?>" data-id="<?= (int)$car['car_id'] ?>" data-name="<?= htmlspecialchars($car['brand'] . ' ' . $car['model_name']) ?>" data-image="<?= htmlspecialchars($car['image'] ?? '') ?>">
+                  <?= htmlspecialchars($car['brand'] . ' ' . $car['model_name']) ?> — ₱<?= number_format((float)$car['daily_rate'], 2) ?>/day
                 </option>
               <?php endforeach; ?>
             <?php else: ?>

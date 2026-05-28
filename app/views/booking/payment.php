@@ -60,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if ($stmt->execute()) {
-        // Build confirmation summary
         $_SESSION['booking_confirmed'] = [
             'ref'     => $ref,
             'vehicle' => $bk['car_name']    ?? '—',
@@ -70,9 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'total'   => '₱' . number_format($total, 2),
         ];
 
-        // Clear booking state
         unset($_SESSION['booking']);
-
         $stmt->close();
         header('Location: ' . BASE_URL . '?page=confirmation');
         exit;
@@ -112,6 +109,127 @@ include '_booking_styles.php';
 @media(max-width:720px){
   .pay-grid { grid-template-columns:1fr !important; }
 }
+
+/* ── QR MODAL ────────────────────────────────────────── */
+#qr-modal {
+  display:none;
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,.82);
+  backdrop-filter:blur(6px);
+  align-items:center; justify-content:center;
+}
+#qr-modal.open { display:flex; }
+
+.qr-box {
+  background:#111113;
+  border:1px solid rgba(255,255,255,.08);
+  padding:2rem 2.2rem 1.8rem;
+  max-width:360px; width:100%;
+  text-align:center;
+  position:relative;
+  animation: qrSlideIn .3s ease;
+}
+@keyframes qrSlideIn {
+  from { transform:translateY(24px); opacity:0; }
+  to   { transform:translateY(0);    opacity:1; }
+}
+
+.qr-brand {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.05rem; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  margin-bottom:1.2rem;
+}
+.qr-brand.gcash { color:#007DFF; }
+.qr-brand.maya  { color:#00C27B; }
+
+.qr-frame {
+  width:200px; height:200px;
+  margin:0 auto 1.2rem;
+  border:3px solid rgba(255,255,255,.06);
+  padding:10px;
+  background:#fff;
+  position:relative;
+}
+
+/* SVG QR pattern inside white frame */
+.qr-frame svg { width:100%; height:100%; }
+
+.qr-amount {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:2rem; font-weight:800;
+  color:#fff; margin-bottom:.25rem;
+}
+.qr-ref {
+  font-size:.7rem; letter-spacing:.15em; text-transform:uppercase;
+  color:rgba(255,255,255,.35); margin-bottom:1.4rem;
+}
+
+/* Scan button */
+.btn-simulate-scan {
+  width:100%; padding:.75rem;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.5);
+  font-size:.75rem; letter-spacing:.1em; text-transform:uppercase;
+  cursor:pointer; margin-bottom:.8rem;
+  transition:all .2s;
+}
+.btn-simulate-scan:hover { border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.8); }
+
+/* Scanning animation overlay */
+.qr-scan-line {
+  position:absolute; left:10px; right:10px; height:2px;
+  background:linear-gradient(90deg,transparent,rgba(192,57,43,.9),transparent);
+  top:10px;
+  animation: scanMove 2s linear infinite;
+  pointer-events:none;
+}
+@keyframes scanMove {
+  0%   { top:10px;  opacity:1; }
+  90%  { top:186px; opacity:1; }
+  100% { top:10px;  opacity:0; }
+}
+
+/* Success state */
+.qr-success {
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  padding:1rem 0 .5rem;
+}
+.qr-success-icon {
+  width:64px; height:64px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; margin-bottom:1rem;
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn {
+  from { transform:scale(0); }
+  to   { transform:scale(1); }
+}
+.qr-success-icon.gcash { background:rgba(0,125,255,.15); border:2px solid #007DFF; }
+.qr-success-icon.maya  { background:rgba(0,194,123,.15); border:2px solid #00C27B; }
+.qr-success h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.3rem; font-weight:700; color:#fff; margin-bottom:.4rem; }
+.qr-success p  { font-size:.8rem; color:rgba(255,255,255,.45); margin-bottom:1.2rem; }
+
+.btn-qr-confirm {
+  width:100%; padding:.85rem;
+  background:var(--crimson,#c0392b); color:#fff;
+  border:none; cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.9rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  transition:opacity .2s;
+}
+.btn-qr-confirm:hover { opacity:.85; }
+
+.qr-cancel {
+  display:block; margin-top:.9rem;
+  font-size:.72rem; color:rgba(255,255,255,.3);
+  cursor:pointer; text-decoration:underline; text-underline-offset:3px;
+  background:none; border:none;
+}
+.qr-cancel:hover { color:rgba(255,255,255,.6); }
 </style>
 
 <div class="bk-hero">
@@ -216,10 +334,16 @@ include '_booking_styles.php';
           </div>
         </div>
 
-        <!-- GCash / Maya -->
-        <div class="card-fields" id="fields-ewallet"
-             style="text-align:center;padding:1.5rem 0;color:var(--text-muted);font-size:.85rem;line-height:1.8;">
-          You will be redirected to complete payment<br>after confirming your booking.
+        <!-- GCash prompt -->
+        <div class="card-fields" id="fields-gcash"
+             style="text-align:center;padding:1.2rem 0 .5rem;color:var(--text-muted);font-size:.85rem;line-height:1.8;">
+          A QR code will appear for you to scan with your GCash app.
+        </div>
+
+        <!-- Maya prompt -->
+        <div class="card-fields" id="fields-maya"
+             style="text-align:center;padding:1.2rem 0 .5rem;color:var(--text-muted);font-size:.85rem;line-height:1.8;">
+          A QR code will appear for you to scan with your Maya app.
         </div>
 
         <!-- Pay Later -->
@@ -228,11 +352,12 @@ include '_booking_styles.php';
           Pay upon vehicle pickup.<br>A ₱500 reservation hold may apply.
         </div>
 
-        <form method="POST" action="<?= BASE_URL ?>?page=payment">
+        <form method="POST" action="<?= BASE_URL ?>?page=payment" id="payment-form">
           <input type="hidden" name="payment_method" id="hidden-pm" value="card">
           <div class="bk-actions" style="margin-top:1.5rem;">
             <a href="<?= BASE_URL ?>?page=booking-form" class="btn btn-ghost">← Back</a>
-            <button type="submit" class="btn btn-red" style="flex:1;justify-content:center;">
+            <button type="button" class="btn btn-red" style="flex:1;justify-content:center;"
+                    onclick="handlePay()">
               Confirm & Pay ₱<?= number_format($summary['total'], 2) ?> →
             </button>
           </div>
@@ -243,18 +368,168 @@ include '_booking_styles.php';
   </div>
 </section>
 
+<!-- ── QR MODAL ──────────────────────────────────────────────── -->
+<div id="qr-modal">
+  <div class="qr-box">
+
+    <!-- QR Pending State -->
+    <div id="qr-pending">
+      <div class="qr-brand" id="qr-brand-label">GCash</div>
+
+      <div class="qr-frame">
+        <!-- Fake QR SVG pattern -->
+        <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+          <!-- Top-left finder -->
+          <rect x="0" y="0" width="7" height="7" fill="#000"/>
+          <rect x="1" y="1" width="5" height="5" fill="#fff"/>
+          <rect x="2" y="2" width="3" height="3" fill="#000"/>
+          <!-- Top-right finder -->
+          <rect x="14" y="0" width="7" height="7" fill="#000"/>
+          <rect x="15" y="1" width="5" height="5" fill="#fff"/>
+          <rect x="16" y="2" width="3" height="3" fill="#000"/>
+          <!-- Bottom-left finder -->
+          <rect x="0" y="14" width="7" height="7" fill="#000"/>
+          <rect x="1" y="15" width="5" height="5" fill="#fff"/>
+          <rect x="2" y="16" width="3" height="3" fill="#000"/>
+          <!-- Data dots — random-looking pattern -->
+          <rect x="8"  y="0"  width="1" height="1" fill="#000"/>
+          <rect x="10" y="0"  width="1" height="1" fill="#000"/>
+          <rect x="12" y="0"  width="1" height="1" fill="#000"/>
+          <rect x="8"  y="2"  width="2" height="1" fill="#000"/>
+          <rect x="11" y="2"  width="1" height="1" fill="#000"/>
+          <rect x="9"  y="4"  width="1" height="1" fill="#000"/>
+          <rect x="12" y="4"  width="1" height="1" fill="#000"/>
+          <rect x="8"  y="6"  width="1" height="2" fill="#000"/>
+          <rect x="10" y="6"  width="2" height="1" fill="#000"/>
+          <rect x="13" y="6"  width="1" height="1" fill="#000"/>
+          <rect x="0"  y="8"  width="1" height="1" fill="#000"/>
+          <rect x="2"  y="8"  width="2" height="1" fill="#000"/>
+          <rect x="5"  y="8"  width="1" height="1" fill="#000"/>
+          <rect x="7"  y="8"  width="2" height="1" fill="#000"/>
+          <rect x="11" y="8"  width="1" height="1" fill="#000"/>
+          <rect x="13" y="8"  width="1" height="2" fill="#000"/>
+          <rect x="15" y="8"  width="2" height="1" fill="#000"/>
+          <rect x="19" y="8"  width="2" height="1" fill="#000"/>
+          <rect x="0"  y="10" width="2" height="1" fill="#000"/>
+          <rect x="4"  y="10" width="1" height="1" fill="#000"/>
+          <rect x="6"  y="10" width="2" height="1" fill="#000"/>
+          <rect x="9"  y="10" width="3" height="1" fill="#000"/>
+          <rect x="14" y="10" width="1" height="1" fill="#000"/>
+          <rect x="17" y="10" width="2" height="1" fill="#000"/>
+          <rect x="1"  y="12" width="1" height="1" fill="#000"/>
+          <rect x="3"  y="12" width="2" height="1" fill="#000"/>
+          <rect x="7"  y="12" width="1" height="1" fill="#000"/>
+          <rect x="10" y="12" width="2" height="1" fill="#000"/>
+          <rect x="14" y="12" width="1" height="2" fill="#000"/>
+          <rect x="16" y="12" width="1" height="1" fill="#000"/>
+          <rect x="19" y="12" width="2" height="1" fill="#000"/>
+          <rect x="8"  y="14" width="1" height="1" fill="#000"/>
+          <rect x="10" y="14" width="1" height="1" fill="#000"/>
+          <rect x="12" y="14" width="2" height="1" fill="#000"/>
+          <rect x="17" y="14" width="1" height="1" fill="#000"/>
+          <rect x="9"  y="16" width="2" height="1" fill="#000"/>
+          <rect x="12" y="16" width="1" height="2" fill="#000"/>
+          <rect x="15" y="16" width="2" height="1" fill="#000"/>
+          <rect x="19" y="16" width="2" height="1" fill="#000"/>
+          <rect x="8"  y="18" width="1" height="2" fill="#000"/>
+          <rect x="11" y="18" width="1" height="1" fill="#000"/>
+          <rect x="13" y="18" width="1" height="1" fill="#000"/>
+          <rect x="16" y="18" width="1" height="2" fill="#000"/>
+          <rect x="18" y="19" width="1" height="1" fill="#000"/>
+          <rect x="20" y="18" width="1" height="2" fill="#000"/>
+        </svg>
+        <div class="qr-scan-line"></div>
+      </div>
+
+      <div class="qr-amount">₱<?= number_format($summary['total'], 2) ?></div>
+      <div class="qr-ref" id="qr-ref-text">REF: —</div>
+
+      <p style="font-size:.72rem;color:rgba(255,255,255,.3);margin-bottom:1rem;">
+        Open your app → Scan QR → Confirm payment
+      </p>
+
+      <button class="btn-simulate-scan" onclick="showQRSuccess()">
+        ✓ &nbsp;Tap here to simulate scan
+      </button>
+
+      <button class="qr-cancel" onclick="closeQR()">Cancel payment</button>
+    </div>
+
+    <!-- QR Success State -->
+    <div class="qr-success" id="qr-success">
+      <div class="qr-success-icon" id="qr-success-icon">✓</div>
+      <h3>Payment Received!</h3>
+      <p id="qr-success-msg">Your GCash payment has been verified.</p>
+      <button class="btn-qr-confirm" onclick="submitBooking()">
+        Complete Booking →
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <script>
+var currentPM = 'card';
+
 function selectPM(method) {
   document.querySelectorAll('.pay-opt').forEach(function(el){ el.classList.remove('selected'); });
   document.querySelectorAll('.card-fields').forEach(function(el){ el.classList.remove('visible'); });
   document.getElementById('pm-' + method).classList.add('selected');
   document.getElementById('hidden-pm').value = method;
-  if (method === 'card')                      document.getElementById('fields-card').classList.add('visible');
-  else if (method === 'gcash' || method === 'maya') document.getElementById('fields-ewallet').classList.add('visible');
-  else if (method === 'cod')                  document.getElementById('fields-cod').classList.add('visible');
+  currentPM = method;
+
+  if (method === 'card')        document.getElementById('fields-card').classList.add('visible');
+  else if (method === 'gcash')  document.getElementById('fields-gcash').classList.add('visible');
+  else if (method === 'maya')   document.getElementById('fields-maya').classList.add('visible');
+  else if (method === 'cod')    document.getElementById('fields-cod').classList.add('visible');
 }
 
-// Card number formatter
+// ── QR Modal logic ────────────────────────────────────────────
+var qrSimTimer = null;
+
+function handlePay() {
+  if (currentPM === 'gcash' || currentPM === 'maya') {
+    openQR(currentPM);
+  } else {
+    document.getElementById('payment-form').submit();
+  }
+}
+
+function openQR(method) {
+  var ref = 'CRG-' + Math.random().toString(36).substring(2,8).toUpperCase();
+  document.getElementById('qr-ref-text').textContent = 'REF: ' + ref;
+
+  var brandLabel  = document.getElementById('qr-brand-label');
+  var successIcon = document.getElementById('qr-success-icon');
+  var successMsg  = document.getElementById('qr-success-msg');
+  brandLabel.className  = 'qr-brand ' + method;
+  successIcon.className = 'qr-success-icon ' + method;
+  brandLabel.textContent = method === 'gcash' ? 'GCash' : 'Maya';
+  successMsg.textContent = 'Your ' + (method === 'gcash' ? 'GCash' : 'Maya') + ' payment has been verified.';
+
+  document.getElementById('qr-pending').style.display = 'block';
+  document.getElementById('qr-success').style.display = 'none';
+
+  document.getElementById('qr-modal').classList.add('open');
+}
+
+function closeQR() {
+  document.getElementById('qr-modal').classList.remove('open');
+  clearTimeout(qrSimTimer);
+}
+
+function showQRSuccess() {
+  document.getElementById('qr-pending').style.display = 'none';
+  var s = document.getElementById('qr-success');
+  s.style.display = 'flex';
+}
+
+function submitBooking() {
+  closeQR();
+  document.getElementById('payment-form').submit();
+}
+
+// ── Card formatters ───────────────────────────────────────────
 var cardNum = document.getElementById('card-num');
 if (cardNum) {
   cardNum.addEventListener('input', function () {
@@ -262,8 +537,6 @@ if (cardNum) {
     this.value = v.replace(/(.{4})/g,'$1 ').trim();
   });
 }
-
-// Expiry formatter
 var cardExp = document.getElementById('card-exp');
 if (cardExp) {
   cardExp.addEventListener('input', function () {

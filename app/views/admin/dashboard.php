@@ -37,6 +37,7 @@ $activePage = 'admin';
         <thead>
             <tr>
                 <th>#</th>
+                <th>Ref</th>
                 <th>Client</th>
                 <th>Car</th>
                 <th>Driver</th>
@@ -51,19 +52,20 @@ $activePage = 'admin';
         <?php if (!empty($recentBookings)): ?>
             <?php foreach ($recentBookings as $b): ?>
             <tr>
-                <td>#<?= $b['booking_id'] ?></td>
-                <td><?= htmlspecialchars($b['clnt_fname'] . ' ' . $b['clnt_lname']) ?></td>
-                <td><?= htmlspecialchars($b['model_name'] ?? $b['plate_number']) ?></td>
-                <td><?= htmlspecialchars($b['drvr_fname'] . ' ' . $b['drvr_lname']) ?></td>
-                <td><?= $b['pickup_date'] ?></td>
-                <td><?= $b['return_date'] ?></td>
-                <td><?= $b['num_days'] ?></td>
-                <td>₱<?= number_format($b['total_price'], 2) ?></td>
-                <td><span class="badge badge-<?= strtolower($b['bkng_status']) ?>"><?= $b['bkng_status'] ?></span></td>
+                <td>#<?= $b['rental_id'] ?></td>
+                <td style="font-family:monospace;font-size:.78rem;color:var(--silver)"><?= htmlspecialchars($b['booking_ref']) ?></td>
+                <td><?= htmlspecialchars(($b['clnt_fname'] ?? '') . ' ' . ($b['clnt_lname'] ?? '')) ?></td>
+                <td><?= htmlspecialchars($b['model_name'] ?? $b['plate_number'] ?? '—') ?></td>
+                <td><?= $b['driver_id'] ? htmlspecialchars(($b['drvr_fname'] ?? '') . ' ' . ($b['drvr_lname'] ?? '')) : '<span style="color:var(--silver);font-style:italic;font-size:.8rem">No Driver</span>' ?></td>
+                <td><?= date('M d, Y', strtotime($b['rental_start'])) ?></td>
+                <td><?= date('M d, Y', strtotime($b['rental_end'])) ?></td>
+                <td><?= $b['total_days'] ?></td>
+                <td>₱<?= number_format($b['total_amount'], 2) ?></td>
+                <td><span class="badge badge-<?= strtolower($b['rental_status']) ?>"><?= ucfirst($b['rental_status']) ?></span></td>
             </tr>
             <?php endforeach; ?>
         <?php else: ?>
-            <tr><td colspan="9" style="text-align:center;color:var(--silver);padding:32px">No bookings found.</td></tr>
+            <tr><td colspan="10" style="text-align:center;color:var(--silver);padding:32px">No bookings found.</td></tr>
         <?php endif; ?>
         </tbody>
     </table>
@@ -91,7 +93,7 @@ $activePage = 'admin';
                 <td><?= htmlspecialchars($c['plate_number']) ?></td>
                 <td><?= htmlspecialchars($c['color']) ?></td>
                 <td><?= $c['year'] ?></td>
-                <td><span class="badge badge-<?= strtolower($c['status']) ?>"><?= $c['status'] ?></span></td>
+                <td><span class="badge badge-<?= strtolower($c['status']) ?>"><?= ucfirst($c['status']) ?></span></td>
             </tr>
             <?php endforeach; ?>
         <?php else: ?>
