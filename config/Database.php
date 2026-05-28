@@ -10,7 +10,7 @@ class Database {
     private static ?Database $instance = null;
     private mysqli $connection;
 
-    private string $host     = 'localhost';
+    private string $host     = 'auth-db1515.hstgr.io';
     private string $username = 'u970217706_cargo';
     private string $password = 'a4b3c2d1_GMP';
     private string $database = 'u970217706_cargo';
