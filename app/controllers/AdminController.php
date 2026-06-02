@@ -329,12 +329,12 @@ class AdminController {
     }
 
     // ─────────────────────────────────────────
-    //  BOOKINGS  ← FIXED: now reads tbl_rental
+    //  BOOKINGS
     // ─────────────────────────────────────────
     public function bookings() {
         $this->requireAdmin();
 
-        $activeTab = $_GET['status']    ?? 'All';
+        $activeTab = $_GET['status']         ?? 'All';
         $search    = trim($_GET['search']    ?? '');
         $dateFrom  = trim($_GET['date_from'] ?? '');
         $dateTo    = trim($_GET['date_to']   ?? '');
@@ -356,10 +356,19 @@ class AdminController {
         $params = [];
         $types  = '';
 
-        if ($activeTab && $activeTab !== 'All') {
+        // Map tab label → DB value
+        $tabMap = [
+            'Docs Pending' => 'docs_pending',
+            'Pending'      => 'pending',
+            'Confirmed'    => 'confirmed',
+            'Completed'    => 'completed',
+            'Cancelled'    => 'cancelled',
+        ];
+
+        if ($activeTab && $activeTab !== 'All' && isset($tabMap[$activeTab])) {
             $sql    .= " AND r.rental_status = ?";
             $types  .= 's';
-            $params[] = strtolower($activeTab);
+            $params[] = $tabMap[$activeTab];
         }
 
         if ($search !== '') {
@@ -406,7 +415,7 @@ class AdminController {
 
         $id      = (int)($_POST['booking_id'] ?? 0);
         $status  = strtolower($_POST['status'] ?? '');
-        $allowed = ['pending', 'confirmed', 'cancelled', 'completed'];
+        $allowed = ['docs_pending', 'pending', 'confirmed', 'cancelled', 'completed'];
 
         if ($id && in_array($status, $allowed, true)) {
             $stmt = $this->db->prepare("UPDATE tbl_rental SET rental_status = ? WHERE rental_id = ?");
@@ -421,6 +430,47 @@ class AdminController {
             'search'    => $_POST['search']      ?? null,
             'date_from' => $_POST['date_from']   ?? null,
             'date_to'   => $_POST['date_to']     ?? null,
+        ]));
+        header('Location: ' . BASE_URL . '?' . $qs);
+        exit;
+    }
+
+    // Document approve / reject
+    public function bookingDocsReview() {
+        $this->requireAdmin();
+
+        $rental_id = (int)($_POST['rental_id'] ?? 0);
+        $action    = $_POST['action'] ?? '';   // 'approve' or 'reject'
+        $docs_note = trim($_POST['docs_note'] ?? '');
+
+        if (!$rental_id || !in_array($action, ['approve', 'reject'], true)) {
+            header('Location: ' . BASE_URL . '?page=admin-bookings');
+            exit;
+        }
+
+        if ($action === 'approve') {
+            // docs approved → move to 'pending' so client can pay
+            $stmt = $this->db->prepare("
+                UPDATE tbl_rental
+                   SET docs_status = 'approved', rental_status = 'pending', docs_note = NULL
+                 WHERE rental_id = ?
+            ");
+            $stmt->bind_param('i', $rental_id);
+        } else {
+            // docs rejected → stay docs_pending, store note
+            $stmt = $this->db->prepare("
+                UPDATE tbl_rental
+                   SET docs_status = 'rejected', docs_note = ?
+                 WHERE rental_id = ?
+            ");
+            $stmt->bind_param('si', $docs_note, $rental_id);
+        }
+        $stmt->execute();
+        $stmt->close();
+
+        $qs = http_build_query(array_filter([
+            'page'   => 'admin-bookings',
+            'status' => $_POST['current_tab'] ?? null,
         ]));
         header('Location: ' . BASE_URL . '?' . $qs);
         exit;

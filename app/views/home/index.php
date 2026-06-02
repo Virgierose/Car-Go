@@ -1,6 +1,6 @@
 <?php /* View: home/index.php | Receives: $featuredCars */ ?>
 
-<link rel="stylesheet" href="/CarGo/assets/css/home.css">
+<link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/home.css">
 
 <!-- ===== HERO ===== -->
 <section class="hero">

@@ -1,0 +1,148 @@
+/* ═══════════════════════════════════════════════════════════════
+   booking-forms.css  —  Form-specific styling adjustments
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Flow card must not clip content ─────────────────────── */
+.flow-card {
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* ── Section divider bleeds to card edge ─────────────────── */
+.section-divider {
+  margin: 2rem -2.2rem !important;
+  width: calc(100% + 4.4rem) !important;
+  border-color: rgba(255, 255, 255, .06) !important;
+}
+
+/* ── Upload zones ────────────────────────────────────────── */
+.upload-zone {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* ── Upload preview container ────────────────────────────── */
+.upload-preview {
+  max-width: 100% !important;
+  max-height: 180px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  background: rgba(0, 0, 0, .3) !important;
+  border: 1px solid rgba(192, 57, 43, .3) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem !important;
+  margin: 0.7rem 0 0 0 !important;
+  display: none !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.upload-preview img {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 140px !important;
+  object-fit: contain !important;
+  display: block !important;
+  border-radius: 4px !important;
+}
+
+.upload-preview span {
+  display: block !important;
+  font-size: 0.75rem !important;
+  color: rgba(255, 255, 255, .6) !important;
+  margin-top: 0.4rem !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+.upload-preview.show {
+  display: flex !important;
+}
+
+/* ── Map wrapper container ──────────────────────────────── */
+#map-wrapper {
+  position: relative !important;
+  z-index: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Map: Leaflet container ─────────────────────────────── */
+#map {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+/* Leaflet must render unclipped */
+.leaflet-container {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* ── Map buttons ─────────────────────────────────────────── */
+.map-btn {
+  border-radius: 6px !important;
+}
+
+/* ── Grid ────────────────────────────────────────────────── */
+.grid-2 {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1.1rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Form controls ───────────────────────────────────────── */
+.form-control {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+textarea.form-control {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* ── Form group with uploads ─────────────────────────────── */
+.form-group {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+
+/* ── Mobile layout ───────────────────────────────────────── */
+@media (max-width: 640px) {
+  .section-divider {
+    margin: 1.5rem -2rem !important;
+    width: calc(100% + 4rem) !important;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 0.9rem !important;
+  }
+
+  #map-wrapper {
+    height: 280px !important;
+  }
+}
+
+/* ── Tablet layout ───────────────────────────────────────── */
+@media (min-width: 641px) and (max-width: 767px) {
+  .section-divider {
+    margin: 1.8rem -2.2rem !important;
+    width: calc(100% + 4.4rem) !important;
+  }
+
+  #map-wrapper {
+    height: 320px !important;
+  }
+}

@@ -25,7 +25,7 @@ usort($filtered, function($a, $b) use ($sort) {
 $filtered = array_values($filtered);
 ?>
 
-<link rel="stylesheet" href="/CarGo/assets/css/browse.css">
+<link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/browse.css">
 
 <!-- ── HERO ─────────────────────────────────────── -->
 <div class="page-hero">

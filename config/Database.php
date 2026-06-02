@@ -12,7 +12,7 @@ class Database {
 
     private string $host     = 'auth-db1515.hstgr.io';
     private string $username = 'u970217706_cargo';
-    private string $password = 'a4b3c2d1_GMP ';
+    private string $password = 'gmp_Cargo3';
     private string $database = 'u970217706_cargo';
     private int    $port     = 3306;
 

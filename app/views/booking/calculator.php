@@ -21,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php include '_booking_styles.php'; ?>
+<link rel="stylesheet" href="<?= BASE_URL ?>assets/css/booking.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>assets/css/booking-forms.css">
 
 <div class="bk-hero">
   <span class="bk-label">Booking — Step <?= $step ?> of 5</span>

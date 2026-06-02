@@ -1,6 +1,6 @@
 <?php ?>
 
-<link rel="stylesheet" href="/CarGo/assets/css/contact.css">
+ <link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/contact.css">
 
 <?php $solidHeader = true; ?>
 

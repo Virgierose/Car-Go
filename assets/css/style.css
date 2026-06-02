@@ -537,3 +537,209 @@ tbody tr:hover { background: var(--black3); }
     background: #111;
     cursor: pointer;
 }
+/* ── PATCH: Constrain flow-card to never go full-width ── */
+/* Add these rules at the END of style.css */
+
+.bk-section {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 2rem 1rem 4rem !important;
+  box-sizing: border-box !important;
+}
+
+.bk-container {
+  max-width: 560px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+.flow-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 20px !important;
+  padding: 2.5rem 2.8rem !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,.5) !important;
+}
+
+.flow-card h2 {
+  margin-top: 0 !important;
+  margin-bottom: 1.6rem !important;
+}
+
+.btn        { border-radius: 50px !important; }
+.btn-red    { border-radius: 50px !important; }
+.btn-ghost  { border-radius: 50px !important; }
+
+.form-control {
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 768px) {
+  .bk-section {
+    padding: 3rem 1.5rem 5rem !important;
+  }
+  .bk-container {
+    margin-top: 16px !important;
+  }
+  .flow-card {
+    padding: 2.8rem 3rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .bk-section {
+    padding: 1.5rem 0.75rem 3rem !important;
+  }
+  .bk-container {
+    max-width: 100% !important;
+  }
+  .flow-card {
+    padding: 1.8rem 1.5rem !important;
+    border-radius: 14px !important;
+  }
+  .bk-actions {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  .bk-actions .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+/* ═══════════════════════════════════════════════════════════════
+   STYLE PATCH — append to bottom of style.css
+   Fixes: booking flow card width + hero header clearance
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Hero: clear fixed header (72px) + breathing room ─────── */
+.bk-hero {
+  padding-top: calc(var(--header-h) + 2rem) !important;
+  padding-bottom: 1.5rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  text-align: center !important;
+}
+
+.steps-wrap {
+  max-width: 640px !important;
+  margin: 0 auto 2rem !important;
+  padding: 0 1rem !important;
+}
+
+/* ── Section & container ──────────────────────────────────── */
+.bk-section {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 0 1rem 4rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.bk-container {
+  max-width: 560px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.flow-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  border-radius: 20px !important;
+  padding: 2.5rem 2.8rem !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,.5) !important;
+}
+
+.flow-card h2 {
+  margin-top: 0 !important;
+  margin-bottom: 1.6rem !important;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.btn       { border-radius: 50px !important; }
+.btn-red   { border-radius: 50px !important; }
+.btn-ghost { border-radius: 50px !important; }
+
+/* ── Inputs ───────────────────────────────────────────────── */
+.form-control {
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+}
+
+/* ── Desktop ──────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .bk-hero {
+    padding-top: calc(var(--header-h) + 2.5rem) !important;
+  }
+  .bk-section {
+    padding: 0 1.5rem 5rem !important;
+  }
+  .bk-container {
+    margin-top: 8px !important;
+  }
+  .flow-card {
+    padding: 2.8rem 3rem !important;
+  }
+}
+
+/* ── Tablet ───────────────────────────────────────────────── */
+@media (min-width: 641px) and (max-width: 767px) {
+  .bk-hero {
+    padding-top: calc(var(--header-h) + 1.5rem) !important;
+  }
+  .bk-container {
+    max-width: 520px !important;
+  }
+  .flow-card {
+    padding: 2.2rem 2.4rem !important;
+    border-radius: 16px !important;
+  }
+}
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .bk-hero {
+    padding-top: calc(var(--header-h) + 1rem) !important;
+    padding-bottom: 1rem !important;
+  }
+  .bk-title {
+    font-size: 2rem !important;
+  }
+  .bk-section {
+    padding: 0 0.75rem 3rem !important;
+  }
+  .bk-container {
+    max-width: 100% !important;
+  }
+  .flow-card {
+    padding: 1.8rem 1.5rem !important;
+    border-radius: 14px !important;
+  }
+  .flow-card h2 {
+    font-size: 1rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .bk-actions {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  .bk-actions .btn {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  /* Steps bar: hide labels on very small screens */
+  .steps-wrap {
+    padding: 0 0.5rem !important;
+  }
+}

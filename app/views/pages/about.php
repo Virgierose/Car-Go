@@ -1,6 +1,6 @@
 <?php ?>
 
-<link rel="stylesheet" href="/CarGo/assets/css/about.css">
+ <link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/about.css">
 
 <?php
 // Tell the header to render as solid (not transparent)

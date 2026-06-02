@@ -45,6 +45,7 @@ $routes = [
     'admin-cars-status'    => ['controller' => 'AdminController',     'method' => 'carStatus'],
     'admin-cars-delete'    => ['controller' => 'AdminController',     'method' => 'carDelete'],
     'admin-bookings'       => ['controller' => 'AdminController',     'method' => 'bookings'],
+    'admin-bookings-docs'  => ['controller' => 'AdminController',     'method' => 'bookingDocsReview'],
     'admin-drivers'        => ['controller' => 'AdminController',     'method' => 'drivers'],
     'admin-clients'        => ['controller' => 'AdminController',     'method' => 'clients'],
     'admin-payments'       => ['controller' => 'AdminController',     'method' => 'payments'],

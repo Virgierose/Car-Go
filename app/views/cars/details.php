@@ -8,7 +8,7 @@ $image = !empty($car['image'])
     : ASSET_URL . 'assets/images/default-car.jpg';
 ?>
 
-<link rel="stylesheet" href="/CarGo/assets/css/car-details.css">
+<link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/car-details.css">
 
 <!-- ── HERO ─────────────────────────────────────── -->
 <div class="page-hero">

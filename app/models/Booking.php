@@ -2,8 +2,8 @@
 
 class Booking {
 
-    private static function db(): PDO {
-        return Database::getInstance()->getConnection();
+    private static function db(): mysqli {
+        return Database::getInstance();
     }
 
     /**
@@ -15,6 +15,8 @@ class Booking {
         ?string $dateFrom = null,
         ?string $dateTo   = null
     ): array {
+        $db = self::db();
+
         $sql = "
             SELECT
                 b.booking_id,
@@ -36,40 +38,51 @@ class Booking {
             WHERE 1=1
         ";
 
+        $types  = '';
         $params = [];
 
         if ($status && $status !== 'All') {
-            $sql .= " AND b.bkng_status = :status";
-            $params[':status'] = $status;
+            $sql   .= " AND b.bkng_status = ?";
+            $types .= 's';
+            $params[] = $status;
         }
 
         if ($search) {
             $sql .= " AND (
-                c.clnt_fname    LIKE :search OR
-                c.clnt_lname    LIKE :search OR
-                ca.model_name   LIKE :search OR
-                ca.plate_number LIKE :search OR
-                d.drvr_fname    LIKE :search OR
-                d.drvr_lname    LIKE :search
+                c.clnt_fname    LIKE ? OR
+                c.clnt_lname    LIKE ? OR
+                ca.model_name   LIKE ? OR
+                ca.plate_number LIKE ? OR
+                d.drvr_fname    LIKE ? OR
+                d.drvr_lname    LIKE ?
             )";
-            $params[':search'] = '%' . $search . '%';
+            $like = '%' . $search . '%';
+            $types .= 'ssssss';
+            array_push($params, $like, $like, $like, $like, $like, $like);
         }
 
         if ($dateFrom) {
-            $sql .= " AND b.pickup_date >= :date_from";
-            $params[':date_from'] = $dateFrom;
+            $sql   .= " AND b.pickup_date >= ?";
+            $types .= 's';
+            $params[] = $dateFrom;
         }
 
         if ($dateTo) {
-            $sql .= " AND b.return_date <= :date_to";
-            $params[':date_to'] = $dateTo;
+            $sql   .= " AND b.return_date <= ?";
+            $types .= 's';
+            $params[] = $dateTo;
         }
 
         $sql .= " ORDER BY b.booking_id DESC";
 
-        $stmt = self::db()->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare($sql);
+
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
@@ -91,11 +104,12 @@ class Booking {
             FROM bookings b
             JOIN cars    ca ON b.car_id    = ca.car_id
             JOIN drivers d  ON b.driver_id = d.driver_id
-            WHERE b.client_id = :client_id
+            WHERE b.client_id = ?
             ORDER BY b.booking_id DESC
         ");
-        $stmt->execute([':client_id' => $clientId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $clientId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
     /**
@@ -109,7 +123,7 @@ class Booking {
      * Get aggregate stats for the admin dashboard.
      */
     public static function stats(): array {
-        $stmt = self::db()->query("
+        $result = self::db()->query("
             SELECT
                 COUNT(*)                             AS total,
                 SUM(bkng_status = 'Active')          AS active,
@@ -118,7 +132,7 @@ class Booking {
                 COALESCE(SUM(total_price), 0)        AS revenue
             FROM bookings
         ");
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result->fetch_assoc();
     }
 
     /**
@@ -130,9 +144,10 @@ class Booking {
             return false;
         }
         $stmt = self::db()->prepare("
-            UPDATE bookings SET bkng_status = :status WHERE booking_id = :id
+            UPDATE bookings SET bkng_status = ? WHERE booking_id = ?
         ");
-        return $stmt->execute([':status' => $status, ':id' => $bookingId]);
+        $stmt->bind_param('si', $status, $bookingId);
+        return $stmt->execute();
     }
 
     /**
@@ -157,11 +172,12 @@ class Booking {
             JOIN clients c  ON b.client_id = c.client_id
             JOIN cars ca    ON b.car_id    = ca.car_id
             JOIN drivers d  ON b.driver_id = d.driver_id
-            WHERE b.booking_id = :id
+            WHERE b.booking_id = ?
             LIMIT 1
         ");
-        $stmt->execute([':id' => $bookingId]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param('i', $bookingId);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
         return $result ?: null;
     }
 

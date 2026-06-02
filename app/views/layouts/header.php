@@ -6,8 +6,9 @@
     <title><?= APP_NAME ?> — CarGo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/CARGO/assets/css/style.css">
-    <link rel="stylesheet" href="/CARGO/assets/css/header.css">
+    <link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/style.css">
+    <link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/header.css">
+   
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
@@ -52,8 +53,7 @@
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="<?= BASE_URL ?>?page=dashboard" class="btn btn-ghost">My Dashboard</a>
-                    <a href="<?= BASE_URL ?>?page=price-calculator" class="btn btn-red">Book Now</a>
+                    <a href="<?= BASE_URL ?>?page=dashboard" class="btn btn-ghost">Dashboard</a>
                     <a href="<?= BASE_URL ?>?page=logout" class="btn btn-ghost">Logout</a>
                 <?php endif; ?>
             <?php else: ?>
