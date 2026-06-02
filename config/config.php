@@ -1,27 +1,20 @@
 <?php
 // =============================================
 // App Configuration
-// Path: C:\xampp\htdocs\CarGo\config\config.php
 // =============================================
-
-// ── Constants ────────────────────────────────
 define('APP_NAME',  'CarGo');
 define('APP_ROOT',  dirname(__DIR__));
-define('BASE_URL',  '/CarGo/public/index.php');
-define('ASSET_URL', '/CarGo/');
+define('BASE_URL',  'https://cargo.bsit2c.site/public/index.php');
+define('ASSET_URL', 'https://cargo.bsit2c.site/');
 define('ROOT_PATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 define('VIEW_PATH', ROOT_PATH . 'app' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR);
 
-// ── Session ───────────────────────────────────
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ── Database ──────────────────────────────────
-// FIXED: was '/config/Database.php' — now points to the single correct location
-require_once APP_ROOT . '/app/core/Database.php';
+require_once APP_ROOT . '/config/Database.php';
 
-// ── render() helper ───────────────────────────
 if (!function_exists('render')) {
     function render(string $view, array $data = []): void {
         extract($data, EXTR_SKIP);
@@ -36,7 +29,20 @@ if (!function_exists('render')) {
     }
 }
 
-// ── renderAdmin() helper ───────────────────────
+// Renders a view with NO header/footer wrapper.
+// Use for standalone pages like admin-mfa-otp that ship their own full HTML.
+if (!function_exists('renderBare')) {
+    function renderBare(string $view, array $data = []): void {
+        extract($data, EXTR_SKIP);
+        $viewFile = APP_ROOT . '/app/views/' . $view . '.php';
+        if (!file_exists($viewFile)) {
+            http_response_code(404);
+            die('View not found: <strong>' . htmlspecialchars($view) . '</strong>');
+        }
+        require $viewFile;
+    }
+}
+
 if (!function_exists('renderAdmin')) {
     function renderAdmin(string $view, array $data = []): void {
         extract($data, EXTR_SKIP);

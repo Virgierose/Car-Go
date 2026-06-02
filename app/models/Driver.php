@@ -1,7 +1,5 @@
 <?php
 
-// Database is already loaded by config.php — no require needed here
-
 class Driver {
 
     private $db;
@@ -11,7 +9,7 @@ class Driver {
     }
 
     // ─────────────────────────────────────────
-    //  Static — used by BookingController
+    //  Static — used by BookingController & PageController
     // ─────────────────────────────────────────
 
     public static function available(): array {
@@ -19,6 +17,11 @@ class Driver {
         $stmt = $db->prepare("
             SELECT
                 driver_id                                AS id,
+                drvr_fname,
+                drvr_lname,
+                drvr_mname,
+                drvr_phone_number,
+                drvr_license_no,
                 CONCAT(drvr_fname, ' ', drvr_lname)     AS name,
                 rate_per_day                             AS fee,
                 driver_status                            AS status
@@ -28,6 +31,12 @@ class Driver {
         ");
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public static function countAll(): int {
+        $db   = Database::getInstance();
+        $result = $db->query("SELECT COUNT(*) AS total FROM tbl_driver");
+        return (int)($result->fetch_assoc()['total'] ?? 0);
     }
 
     // ─────────────────────────────────────────

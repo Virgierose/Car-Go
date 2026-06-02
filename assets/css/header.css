@@ -8,7 +8,6 @@
    ADMIN PROFILE DROPDOWN
    ============================================================ */
 
-/* ── Wrapper (trigger) ── */
 .admin-profile {
   position: relative;
   display: flex;
@@ -17,7 +16,6 @@
   cursor: pointer;
 }
 
-/* ── Avatar circle ── */
 .admin-avatar {
   width: 34px;
   height: 34px;
@@ -34,13 +32,11 @@
   transition: border-color .2s, box-shadow .2s;
 }
 
-/* Avatar glow on hover */
 .admin-profile:hover .admin-avatar {
   border-color: #fff;
   box-shadow: 0 0 0 3px rgba(192,17,31,0.3);
 }
 
-/* ── Dropdown panel ── */
 .admin-dropdown {
   position: absolute;
   top: calc(100% + 10px);
@@ -50,8 +46,6 @@
   border-radius: 8px;
   min-width: 160px;
   padding: 6px 0;
-
-  /* Hidden by default */
   opacity: 0;
   pointer-events: none;
   transform: translateY(-6px);
@@ -59,7 +53,6 @@
   z-index: 300;
 }
 
-/* Show dropdown on hover or keyboard focus */
 .admin-profile:hover .admin-dropdown,
 .admin-profile:focus-within .admin-dropdown {
   opacity: 1;
@@ -67,7 +60,6 @@
   transform: translateY(0);
 }
 
-/* ── Dropdown links ── */
 .admin-dropdown a {
   display: flex;
   align-items: center;
@@ -88,25 +80,40 @@
   color: #fff;
 }
 
-/* Danger / sign-out link */
 .admin-dropdown a.danger       { color: #f87171; }
 .admin-dropdown a.danger:hover { background: rgba(192,17,31,.12); color: #ef4444; }
 
-/* Divider between link groups */
 .admin-dropdown hr {
   border: none;
   border-top: 1px solid #2e2e2e;
   margin: 4px 0;
 }
 
+/* ============================================================
+   HAMBURGER OPEN STATE  —  animate to × when menu is open
+   ============================================================ */
+
+.hamburger span {
+  transition: transform .25s, opacity .25s;
+  transform-origin: center;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
 
 /* ============================================================
    RESPONSIVE  –  small mobile  (≤ 480px)
    ============================================================ */
 
 @media (max-width: 480px) {
-
-  /* Prevent dropdown from going off-screen on narrow viewports */
   .admin-dropdown {
     right: auto;
     left: 0;

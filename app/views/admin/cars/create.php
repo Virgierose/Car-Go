@@ -7,147 +7,173 @@ $errors = $errors ?? [];
 $old    = $old    ?? [];
 ?>
 
-<div class="form-card">
-    <?php if ($error): ?>
-        <div class="alert alert-error">
-            <i class="fas fa-exclamation-triangle"></i>
-            <div><?= htmlspecialchars($error) ?></div>
-        </div>
-    <?php endif; ?>
+<link rel="stylesheet" href="<?= BASE_URL ?>assets/css/cars.css">
 
-    <?php if (!empty($errors)): ?>
-        <div class="alert alert-error">
-            <i class="fas fa-exclamation-triangle"></i>
-            <ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul>
-        </div>
-    <?php endif; ?>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="page-header-left">
+        <h1 class="page-title">Add New Car</h1>
+        <p class="page-subtitle">Register a new vehicle to your fleet</p>
+    </div>
+    <a href="<?= BASE_URL ?>?page=admin-cars" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Fleet
+    </a>
+</div>
+
+<!-- ALERTS -->
+<?php if ($error): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div><?= htmlspecialchars($error) ?></div>
+    </div>
+<?php endif; ?>
+<?php if (!empty($errors)): ?>
+    <div class="alert alert-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul>
+    </div>
+<?php endif; ?>
+
+<!-- FORM CARD -->
+<div class="form-card">
+    <div class="form-card-header">
+        <span class="form-card-title">Vehicle Information</span>
+    </div>
 
     <form method="POST" action="<?= BASE_URL ?>?page=admin-cars-store" enctype="multipart/form-data">
 
-        <div class="form-section-label">Vehicle Information</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Brand <span class="req">*</span></label>
-                <input type="text" name="brand" class="form-input" placeholder="e.g. Toyota" value="<?= htmlspecialchars($old['brand'] ?? '') ?>" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Model <span class="req">*</span></label>
-                <input type="text" name="model_name" class="form-input" placeholder="e.g. Vios" value="<?= htmlspecialchars($old['model_name'] ?? '') ?>" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Plate Number <span class="req">*</span></label>
-                <input type="text" name="plate_number" class="form-input" placeholder="e.g. ABC 1234" value="<?= htmlspecialchars($old['plate_number'] ?? '') ?>" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Year <span class="req">*</span></label>
-                <input type="number" name="year" class="form-input" placeholder="e.g. 2022" min="1990" max="2030" value="<?= htmlspecialchars($old['year'] ?? '') ?>" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Color <span class="req">*</span></label>
-                <input type="text" name="color" class="form-input" placeholder="e.g. Black" value="<?= htmlspecialchars($old['color'] ?? '') ?>" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Transmission</label>
-                <select name="transmission" class="form-select">
-                    <option value="Automatic" <?= ($old['transmission'] ?? 'Automatic') === 'Automatic' ? 'selected' : '' ?>>Automatic</option>
-                    <option value="Manual"    <?= ($old['transmission'] ?? '') === 'Manual'    ? 'selected' : '' ?>>Manual</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Fuel Type</label>
-                <select name="fuel_type" class="form-select">
-                    <option value="Gasoline" <?= ($old['fuel_type'] ?? 'Gasoline') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
-                    <option value="Diesel"   <?= ($old['fuel_type'] ?? '') === 'Diesel'   ? 'selected' : '' ?>>Diesel</option>
-                    <option value="Electric" <?= ($old['fuel_type'] ?? '') === 'Electric' ? 'selected' : '' ?>>Electric</option>
-                    <option value="Hybrid"   <?= ($old['fuel_type'] ?? '') === 'Hybrid'   ? 'selected' : '' ?>>Hybrid</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Seats</label>
-                <input type="number" name="seats" class="form-input" placeholder="e.g. 5" min="1" max="20" value="<?= htmlspecialchars($old['seats'] ?? '5') ?>">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Engine</label>
-                <input type="text" name="engine" class="form-input" placeholder="e.g. 2.0L" value="<?= htmlspecialchars($old['engine'] ?? '') ?>">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="available"   <?= ($old['status'] ?? 'available') === 'available'   ? 'selected' : '' ?>>Available</option>
-                    <option value="maintenance" <?= ($old['status'] ?? '') === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
-                    <option value="rented"      <?= ($old['status'] ?? '') === 'rented'      ? 'selected' : '' ?>>Rented</option>
-                </select>
-            </div>
-        </div>
+        <div class="form-card-body">
 
-        <div class="form-divider"></div>
-        <div class="form-section-label">Pricing</div>
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Daily Rate (₱) <span class="req">*</span></label>
-                <div class="input-prefix-wrap">
-                    <span class="input-prefix">₱</span>
-                    <input type="number" name="daily_rate" class="form-input has-prefix" placeholder="0.00" step="0.01" min="0" value="<?= htmlspecialchars($old['daily_rate'] ?? '0') ?>" required>
+            <!-- Vehicle Details -->
+            <div class="form-section-label">Basic Details</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Brand <span class="req">*</span></label>
+                    <input type="text" name="brand" class="form-input" placeholder="e.g. Toyota"
+                           value="<?= htmlspecialchars($old['brand'] ?? '') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Model <span class="req">*</span></label>
+                    <input type="text" name="model_name" class="form-input" placeholder="e.g. Vios"
+                           value="<?= htmlspecialchars($old['model_name'] ?? '') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Plate Number <span class="req">*</span></label>
+                    <input type="text" name="plate_number" class="form-input" placeholder="e.g. ABC 1234"
+                           value="<?= htmlspecialchars($old['plate_number'] ?? '') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Year <span class="req">*</span></label>
+                    <input type="number" name="year" class="form-input" placeholder="e.g. 2022"
+                           min="1990" max="2030"
+                           value="<?= htmlspecialchars($old['year'] ?? '') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Color <span class="req">*</span></label>
+                    <input type="text" name="color" class="form-input" placeholder="e.g. Black"
+                           value="<?= htmlspecialchars($old['color'] ?? '') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Seats</label>
+                    <input type="number" name="seats" class="form-input" placeholder="e.g. 5"
+                           min="1" max="20" value="<?= htmlspecialchars($old['seats'] ?? '5') ?>">
                 </div>
             </div>
-        </div>
 
-        <div class="form-divider"></div>
-        <div class="form-section-label">Car Image</div>
-        <div class="form-group">
-            <label class="upload-area" id="uploadArea">
-                <input type="file" name="car_image" id="carImage" accept="image/*" style="display:none" onchange="previewImage(this)">
-                <div id="uploadPlaceholder">
-                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <p class="upload-text">Click to upload car image</p>
-                    <p class="upload-hint">PNG, JPG, GIF, WEBP up to 5MB</p>
+            <div class="form-divider"></div>
+
+            <!-- Specs -->
+            <div class="form-section-label">Specifications</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Transmission</label>
+                    <select name="transmission" class="form-select">
+                        <option value="Automatic" <?= ($old['transmission'] ?? 'Automatic') === 'Automatic' ? 'selected' : '' ?>>Automatic</option>
+                        <option value="Manual"    <?= ($old['transmission'] ?? '') === 'Manual'             ? 'selected' : '' ?>>Manual</option>
+                    </select>
                 </div>
-                <img id="imagePreview" src="" alt="" style="display:none;max-height:180px;border-radius:8px;object-fit:contain;">
-            </label>
-        </div>
+                <div class="form-group">
+                    <label class="form-label">Fuel Type</label>
+                    <select name="fuel_type" class="form-select">
+                        <option value="Gasoline" <?= ($old['fuel_type'] ?? 'Gasoline') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
+                        <option value="Diesel"   <?= ($old['fuel_type'] ?? '') === 'Diesel'           ? 'selected' : '' ?>>Diesel</option>
+                        <option value="Electric" <?= ($old['fuel_type'] ?? '') === 'Electric'         ? 'selected' : '' ?>>Electric</option>
+                        <option value="Hybrid"   <?= ($old['fuel_type'] ?? '') === 'Hybrid'           ? 'selected' : '' ?>>Hybrid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Engine</label>
+                    <input type="text" name="engine" class="form-input" placeholder="e.g. 2.0L"
+                           value="<?= htmlspecialchars($old['engine'] ?? '') ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="available"   <?= ($old['status'] ?? 'available') === 'available'   ? 'selected' : '' ?>>Available</option>
+                        <option value="maintenance" <?= ($old['status'] ?? '') === 'maintenance'           ? 'selected' : '' ?>>Maintenance</option>
+                        <option value="rented"      <?= ($old['status'] ?? '') === 'rented'               ? 'selected' : '' ?>>Rented</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Pricing -->
+            <div class="form-section-label">Pricing</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Daily Rate (₱) <span class="req">*</span></label>
+                    <div class="input-prefix-wrap">
+                        <span class="input-prefix">₱</span>
+                        <input type="number" name="daily_rate" class="form-input has-prefix"
+                               placeholder="0.00" step="0.01" min="0"
+                               value="<?= htmlspecialchars($old['daily_rate'] ?? '0') ?>" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Image Upload -->
+            <div class="form-section-label">Car Image</div>
+            <div class="form-group">
+                <label class="upload-area" id="uploadArea">
+                    <input type="file" name="car_image" id="carImage" accept="image/*"
+                           style="display:none" onchange="previewImage(this)">
+                    <div id="uploadPlaceholder">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <p class="upload-text">Click to upload car image</p>
+                        <p class="upload-hint">PNG, JPG, GIF, WEBP up to 5MB</p>
+                    </div>
+                    <img id="imagePreview" src="" alt=""
+                         style="display:none;max-height:180px;border-radius:8px;object-fit:contain;">
+                </label>
+            </div>
+
+        </div><!-- /.form-card-body -->
 
         <div class="form-actions">
-            <a href="<?= BASE_URL ?>?page=admin-cars" class="btn btn-outline">Cancel</a>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Car</button>
+            <a href="<?= BASE_URL ?>?page=admin-cars" class="btn btn-outline">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Car
+            </button>
         </div>
+
     </form>
 </div>
-
-<style>
-.form-card { background:var(--black-card); border:1px solid var(--border); border-radius:12px; padding:32px; }
-.form-section-label { color:var(--red); font-size:.75rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin-bottom:18px; }
-.form-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:16px; margin-bottom:24px; }
-.form-group { display:flex; flex-direction:column; gap:6px; }
-.form-label { color:var(--silver); font-size:.8rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
-.req { color:var(--red); }
-.form-input, .form-select { background:var(--black); border:1px solid var(--border); border-radius:6px; color:var(--white); padding:11px 14px; font-size:.9rem; width:100%; box-sizing:border-box; transition:border-color .2s; font-family:'Barlow',sans-serif; }
-.form-input:focus, .form-select:focus { outline:none; border-color:var(--red); }
-.form-select option { background:var(--black-card); }
-.input-prefix-wrap { position:relative; }
-.input-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--silver); }
-.has-prefix { padding-left:28px; }
-.form-divider { border:none; border-top:1px solid var(--border); margin:8px 0 24px; }
-.form-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:28px; }
-.btn-primary { background:var(--red); color:var(--white); border:none; padding:11px 22px; border-radius:8px; font-size:.85rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:background .2s; font-family:'Barlow',sans-serif; }
-.btn-primary:hover { background:#a00816; }
-.alert { border-radius:8px; padding:14px 18px; margin-bottom:20px; display:flex; align-items:flex-start; gap:10px; }
-.alert-error { background:rgba(192,17,31,.12); border:1px solid rgba(192,17,31,.3); color:#f87171; }
-.alert ul { margin:0; padding-left:16px; }
-.upload-area { display:flex; align-items:center; justify-content:center; flex-direction:column; border:2px dashed var(--border); border-radius:10px; padding:40px; cursor:pointer; transition:border-color .2s; text-align:center; }
-.upload-area:hover { border-color:var(--red); }
-.upload-icon { font-size:2.5rem; color:var(--red); margin-bottom:12px; opacity:.7; }
-.upload-text { color:var(--white); font-weight:600; margin:0 0 4px; }
-.upload-hint { color:var(--silver); font-size:.8rem; margin:0; }
-</style>
 
 <script>
 function previewImage(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = e => {
-            document.getElementById('imagePreview').src = e.target.result;
-            document.getElementById('imagePreview').style.display = 'block';
-            document.getElementById('uploadPlaceholder').style.display = 'none';
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
         };
         reader.readAsDataURL(input.files[0]);
     }

@@ -62,11 +62,45 @@
             <?php endif; ?>
         </div>
 
-        <button class="hamburger" id="hamburger">
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
             <span></span><span></span><span></span>
         </button>
 
     </div>
 </header>
+
+<script>
+(function () {
+    var btn = document.getElementById('hamburger');
+    var nav = document.getElementById('main-nav');
+    var header = document.querySelector('.site-header');
+
+    if (!btn || !nav) return;
+
+    btn.addEventListener('click', function () {
+        var isOpen = nav.classList.toggle('open');
+        btn.classList.toggle('open', isOpen);
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Close menu when a nav link is clicked
+    nav.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+            nav.classList.remove('open');
+            btn.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!header.contains(e.target)) {
+            nav.classList.remove('open');
+            btn.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+})();
+</script>
 
 <main>

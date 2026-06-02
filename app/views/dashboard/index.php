@@ -2,7 +2,10 @@
 /**
  * View: dashboard/index.php
  * Tabs: My Bookings | History | Profile
- * Tables: tbl_rental, tbl_booking, tbl_client, tbl_car, tbl_car_model, tbl_driver
+ *
+ * FIX: Cleaned up rental-card action block — no more duplicate
+ *      Details/Cancel buttons. Payment button now correctly shows
+ *      when rental_status = 'pending' AND docs_status = 'approved'.
  */
 
 // ── GUARD ────────────────────────────────────────────────────
@@ -16,7 +19,7 @@ $uid = (int) $_SESSION['client_id'];
 $db  = Database::getInstance();
 
 // ── ACTIVE TAB ───────────────────────────────────────────────
-$tab = $_GET['tab'] ?? 'bookings'; // bookings | history | profile
+$tab = $_GET['tab'] ?? 'bookings';
 
 // ════════════════════════════════════════════════════════════
 // HANDLE POST: PROFILE UPDATE
@@ -35,14 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['action'] ?? '') === 'update
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'Valid email is required.';
 
     if (empty($errors)) {
-        // Check email uniqueness (excluding self)
         $chk = $db->prepare("SELECT client_id FROM tbl_client WHERE email = ? AND client_id != ?");
         $chk->bind_param('si', $email, $uid);
         $chk->execute();
         $chk->store_result();
-        if ($chk->num_rows > 0) {
-            $errors[] = 'That email is already used by another account.';
-        }
+        if ($chk->num_rows > 0) $errors[] = 'That email is already used by another account.';
         $chk->close();
     }
 
@@ -57,12 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['action'] ?? '') === 'update
         $stmt->execute();
         $stmt->close();
 
-        // Update session name
         $_SESSION['client_fname'] = $fname;
         header('Location: ' . BASE_URL . '?page=dashboard&tab=profile&success=profile');
         exit;
     }
-    // Fall through with $errors
     $tab = 'profile';
 }
 
@@ -73,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['action'] ?? '') === 'change
     $confirm  = $_POST['confirm_password']  ?? '';
     $pw_errors = [];
 
-    // Fetch current hash
     $chk = $db->prepare("SELECT password FROM tbl_client WHERE client_id = ?");
     $chk->bind_param('i', $uid);
     $chk->execute();
@@ -103,7 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['action'] ?? '') === 'cancel
     if ($rid) {
         $stmt = $db->prepare("
             UPDATE tbl_rental SET rental_status = 'cancelled'
-            WHERE rental_id = ? AND client_id = ? AND rental_status IN ('docs_pending','pending','confirmed')
+            WHERE rental_id = ? AND client_id = ?
+              AND rental_status IN ('docs_pending','pending','confirmed')
         ");
         $stmt->bind_param('ii', $rid, $uid);
         $stmt->execute();
@@ -124,23 +122,23 @@ $pstmt->execute();
 $client = $pstmt->get_result()->fetch_assoc();
 $pstmt->close();
 
-// ── Active/Upcoming rentals from tbl_rental ──────────────────
+// ── Active / Upcoming rentals ────────────────────────────────
 $rstmt = $db->prepare("
     SELECT
         r.rental_id,
         r.booking_ref,
         r.car_id,
         CONCAT(cm.brand, ' ', cm.model_name) AS vehicle,
-        c.year AS car_year,
-        c.image AS car_image,
+        c.year          AS car_year,
+        c.image         AS car_image,
         c.plate_number,
-        r.rental_start   AS pickup,
-        r.rental_end     AS `return`,
+        r.rental_start  AS pickup,
+        r.rental_end    AS `return`,
         r.total_days,
-        r.total_amount   AS amount,
+        r.total_amount  AS amount,
         r.pickup_address,
         r.payment_method,
-        r.rental_status  AS status,
+        r.rental_status AS status,
         r.docs_status,
         r.docs_note,
         r.notes,
@@ -163,20 +161,20 @@ $rstmt->execute();
 $active_rentals = $rstmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $rstmt->close();
 
-// ── History: completed/cancelled rentals ─────────────────────
+// ── History ───────────────────────────────────────────────────
 $hstmt = $db->prepare("
     SELECT
         r.rental_id,
         r.booking_ref,
         CONCAT(cm.brand, ' ', cm.model_name) AS vehicle,
-        c.year AS car_year,
-        c.image AS car_image,
-        r.rental_start   AS pickup,
-        r.rental_end     AS `return`,
+        c.year          AS car_year,
+        c.image         AS car_image,
+        r.rental_start  AS pickup,
+        r.rental_end    AS `return`,
         r.total_days,
-        r.total_amount   AS amount,
+        r.total_amount  AS amount,
         r.payment_method,
-        r.rental_status  AS status,
+        r.rental_status AS status,
         r.date_created,
         CONCAT(d.drvr_fname, ' ', d.drvr_lname) AS driver_name,
         r.dest_address,
@@ -197,7 +195,7 @@ $history = $hstmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $hstmt->close();
 
 // ── Stats ─────────────────────────────────────────────────────
-$all_rentals  = array_merge($active_rentals, $history);
+$all_rentals = array_merge($active_rentals, $history);
 $stats = [
     'total'     => count($all_rentals),
     'active'    => count($active_rentals),
@@ -225,20 +223,16 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
 
 <!-- ══ TOAST ════════════════════════════════════════════════ -->
 <?php if (!empty($_GET['success'])): ?>
-<div id="toast" style="position:fixed;bottom:1.5rem;right:1.5rem;
-     background:<?= $_GET['success'] === 'cancelled' ? '#c0392b' : '#27ae60' ?>;
-     color:#fff;padding:10px 20px;border-radius:4px;font-size:.875rem;font-weight:600;
-     z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.3);">
-  <?php
-    $msgs = [
-      'profile'   => '✅ Profile updated!',
-      'password'  => '✅ Password changed!',
-      'cancelled' => '🚫 Booking cancelled.',
-    ];
-    echo $msgs[$_GET['success']] ?? '✅ Done!';
-  ?>
-</div>
-<script>setTimeout(function(){var t=document.getElementById('toast');if(t){t.style.transition='opacity .4s';t.style.opacity='0';}},3000);</script>
+<?php
+$toastMap = [
+    'profile'   => ['cls' => 'toast-success', 'msg' => '✅ Profile updated!'],
+    'password'  => ['cls' => 'toast-success', 'msg' => '✅ Password changed!'],
+    'cancelled' => ['cls' => 'toast-cancel',  'msg' => '🚫 Booking cancelled.'],
+];
+$t = $toastMap[$_GET['success']] ?? ['cls' => 'toast-success', 'msg' => '✅ Done!'];
+?>
+<div id="toast" class="toast <?= $t['cls'] ?>"><?= $t['msg'] ?></div>
+<script>setTimeout(function(){var el=document.getElementById('toast');if(el){el.style.opacity='0';}},3000);</script>
 <?php endif; ?>
 
 <!-- ══ MAIN LAYOUT ══════════════════════════════════════════ -->
@@ -247,7 +241,7 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
 <div class="dash-wrap">
 
     <!-- ── Side Nav ───────────────────────────────────────── -->
-    <div class="side-nav">
+    <nav class="side-nav">
         <a href="<?= BASE_URL ?>?page=dashboard&tab=bookings"
            class="<?= $tab === 'bookings' ? 'active' : '' ?>">My Bookings</a>
         <a href="<?= BASE_URL ?>?page=dashboard&tab=history"
@@ -256,8 +250,8 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
            class="<?= $tab === 'profile'  ? 'active' : '' ?>">Profile</a>
         <hr>
         <a href="<?= BASE_URL ?>?page=price-calculator">+ New Booking</a>
-        <a href="<?= BASE_URL ?>?page=logout" style="color:var(--muted,#888);">Logout</a>
-    </div>
+        <a href="<?= BASE_URL ?>?page=logout" style="color:var(--text-muted);">Logout</a>
+    </nav>
 
     <!-- ── Main Panel ─────────────────────────────────────── -->
     <div>
@@ -285,11 +279,8 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
         <!-- ════ TAB: MY BOOKINGS ════════════════════════════ -->
         <div class="tab-panel <?= $tab === 'bookings' ? 'active' : '' ?>">
 
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-                <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;
-                           letter-spacing:.1em;text-transform:uppercase;color:#fff;">
-                    Active &amp; Upcoming Rentals
-                </h2>
+            <div class="section-header-row">
+                <h2>Active &amp; Upcoming Rentals</h2>
                 <a href="<?= BASE_URL ?>?page=price-calculator" class="btn btn-red btn-sm">+ New Booking</a>
             </div>
 
@@ -300,8 +291,13 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                 <a href="<?= BASE_URL ?>?page=price-calculator" class="btn btn-red">Book a Car Now</a>
             </div>
             <?php else: ?>
-                <?php foreach ($active_rentals as $r): ?>
+
+                <?php foreach ($active_rentals as $r):
+                    $status      = $r['status']     ?? '';
+                    $docs_status = $r['docs_status'] ?? '';
+                ?>
                 <div class="rental-card">
+
                     <!-- Car Image -->
                     <div>
                         <?php if (!empty($r['car_image'])): ?>
@@ -317,100 +313,105 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                         <div class="rental-ref"><?= htmlspecialchars($r['booking_ref']) ?></div>
                         <div class="rental-veh">
                             <?= htmlspecialchars($r['vehicle']) ?>
-                            <span style="font-size:.85rem;font-weight:400;color:var(--text-muted,#888);">
+                            <span style="font-size:.85rem;font-weight:400;color:var(--text-muted);">
                                 (<?= htmlspecialchars($r['car_year']) ?>)
                             </span>
                         </div>
                         <div class="rental-meta">
                             <span>📅 <strong><?= date('M d, Y g:i A', strtotime($r['pickup'])) ?></strong></span>
                             <span>🔁 Return: <strong><?= date('M d, Y g:i A', strtotime($r['return'])) ?></strong></span>
-                            <span>📍 <strong><?= $r['pickup_address'] ?: 'TBD' ?></strong></span>
-                            <span>🧑‍✈️ <strong><?= $r['driver_name'] ?? 'Self-Drive' ?></strong></span>
+                            <span>📍 <strong><?= htmlspecialchars($r['pickup_address'] ?: 'TBD') ?></strong></span>
+                            <span>🧑‍✈️ <strong><?= htmlspecialchars($r['driver_name'] ?? 'Self-Drive') ?></strong></span>
                             <span>💳 <strong><?= strtoupper($r['payment_method']) ?></strong></span>
-                            <span><?= $r['total_days'] ?> day<?= $r['total_days'] > 1 ? 's' : '' ?></span>
+                            <span><?= (int)$r['total_days'] ?> day<?= $r['total_days'] > 1 ? 's' : '' ?></span>
                         </div>
                     </div>
 
-                    <!-- Right: amount + actions -->
+                    <!-- ── RIGHT COLUMN: badge + amount + actions ── -->
+                    <!--
+                        STATUS LOGIC (mutually exclusive, clean):
+                        1. docs_pending + rejected  → show rejection note + Cancel
+                        2. docs_pending + pending   → show "under review" + Cancel
+                        3. pending + approved       → ✅ PAYMENT BUTTON (the fix)
+                        4. confirmed                → Details + Cancel
+                        5. anything else            → Details only
+                    -->
                     <div class="rental-actions">
-                        <div>
-                            <span class="badge badge-<?= $r['status'] ?>"><?= ucfirst(str_replace('_',' ',$r['status'])) ?></span>
-                        </div>
-                        <div class="rental-amount">₱<?= number_format($r['amount'], 2) ?></div>
 
-                        <?php if ($r['status'] === 'docs_pending'): ?>
-                          <!-- Waiting for admin to review documents -->
-                          <?php if (($r['docs_status'] ?? '') === 'rejected'): ?>
-                          <div style="font-size:.72rem;color:#e05252;text-align:right;max-width:160px;">
-                            ✕ Docs rejected<?= !empty($r['docs_note']) ? ': ' . htmlspecialchars($r['docs_note']) : '' ?>
-                          </div>
-                          <?php else: ?>
-                          <div style="font-size:.72rem;color:#f39c12;text-align:right;">
-                            ⏳ Documents under review…
-                          </div>
-                          <?php endif; ?>
+                        <span class="badge badge-<?= $status ?>">
+                            <?= ucfirst(str_replace('_', ' ', $status)) ?>
+                        </span>
 
-                        <?php elseif ($r['status'] === 'pending' && ($r['docs_status'] ?? '') === 'approved'): ?>
-                          <!-- Approved — client can now pay -->
-                          <a href="<?= BASE_URL ?>?page=payment&rental_id=<?= (int)$r['rental_id'] ?>"
-                             class="btn btn-red btn-sm" style="text-align:center;">
-                            💳 Proceed to Payment
-                          </a>
+                        <div class="rental-amount">₱<?= number_format((float)$r['amount'], 2) ?></div>
 
-                        <?php else: ?>
-                          <!-- Confirmed / other -->
-                          <div style="display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;">
-                            <button class="btn btn-dark btn-sm"
-                                onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
-                                Details
-                            </button>
-                            <?php if (in_array($r['status'], ['pending','confirmed'])): ?>
-                            <button class="btn btn-sm" style="color:#e05252;border-color:#e05252;"
-                                onclick="openCancel(<?= (int)$r['rental_id'] ?>, '<?= htmlspecialchars($r['vehicle'], ENT_QUOTES) ?>')">
-                                Cancel
-                            </button>
+                        <?php if ($status === 'docs_pending'): ?>
+                            <?php if ($docs_status === 'rejected'): ?>
+                                <div class="docs-notice rejected">
+                                    ✕ Docs rejected<?= !empty($r['docs_note']) ? ': ' . htmlspecialchars($r['docs_note']) : '' ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="docs-notice review">
+                                    ⏳ Documents under review…
+                                </div>
                             <?php endif; ?>
-                          </div>
+                            <div class="action-group">
+                                <button class="btn btn-dark btn-sm"
+                                    onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
+                                    Details
+                                </button>
+                                <button class="btn btn-cancel btn-sm"
+                                    onclick="openCancel(<?= (int)$r['rental_id'] ?>, '<?= htmlspecialchars($r['vehicle'], ENT_QUOTES) ?>')">
+                                    Cancel
+                                </button>
+                            </div>
+
+                        <?php elseif ($status === 'pending' && $docs_status === 'approved'): ?>
+                            <!-- ✅ FIX: docs approved, awaiting payment -->
+                            <a href="<?= BASE_URL ?>?page=payment&rental_id=<?= (int)$r['rental_id'] ?>"
+                               class="btn btn-red btn-sm">
+                                💳 Proceed to Payment
+                            </a>
+                            <div class="action-group">
+                                <button class="btn btn-dark btn-sm"
+                                    onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
+                                    Details
+                                </button>
+                            </div>
+
+                        <?php elseif ($status === 'confirmed'): ?>
+                            <div class="action-group">
+                                <button class="btn btn-dark btn-sm"
+                                    onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
+                                    Details
+                                </button>
+                                <button class="btn btn-cancel btn-sm"
+                                    onclick="openCancel(<?= (int)$r['rental_id'] ?>, '<?= htmlspecialchars($r['vehicle'], ENT_QUOTES) ?>')">
+                                    Cancel
+                                </button>
+                            </div>
+
+                        <?php else: ?>
+                            <div class="action-group">
+                                <button class="btn btn-dark btn-sm"
+                                    onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
+                                    Details
+                                </button>
+                            </div>
                         <?php endif; ?>
 
-                        <?php if ($r['status'] !== 'docs_pending'): ?>
-                        <div style="display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;margin-top:.3rem;">
-                          <button class="btn btn-dark btn-sm"
-                              onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
-                              Details
-                          </button>
-                          <?php if (in_array($r['status'], ['pending']) && ($r['docs_status'] ?? '') !== 'approved'): ?>
-                          <button class="btn btn-sm" style="color:#e05252;border-color:#e05252;"
-                              onclick="openCancel(<?= (int)$r['rental_id'] ?>, '<?= htmlspecialchars($r['vehicle'], ENT_QUOTES) ?>')">
-                              Cancel
-                          </button>
-                          <?php endif; ?>
-                        </div>
-                        <?php else: ?>
-                        <div style="margin-top:.4rem;">
-                          <button class="btn btn-dark btn-sm"
-                              onclick="openDetail(<?= htmlspecialchars(json_encode($r), ENT_QUOTES) ?>)">
-                              Details
-                          </button>
-                          <button class="btn btn-sm" style="color:#e05252;border-color:#e05252;margin-left:.3rem;"
-                              onclick="openCancel(<?= (int)$r['rental_id'] ?>, '<?= htmlspecialchars($r['vehicle'], ENT_QUOTES) ?>')">
-                              Cancel
-                          </button>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                    </div><!-- /rental-actions -->
+                </div><!-- /rental-card -->
                 <?php endforeach; ?>
+
             <?php endif; ?>
-        </div>
+        </div><!-- /tab bookings -->
 
         <!-- ════ TAB: HISTORY ════════════════════════════════ -->
         <div class="tab-panel <?= $tab === 'history' ? 'active' : '' ?>">
 
-            <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;
-                       letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:1rem;">
-                Rental History
-            </h2>
+            <div class="section-header-row">
+                <h2>Rental History</h2>
+            </div>
 
             <?php if (empty($history)): ?>
             <div class="empty-state">
@@ -437,12 +438,12 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                 <tbody>
                 <?php foreach ($history as $r): ?>
                 <tr>
-                    <td class="mono" style="color:var(--text-muted,#888);font-size:.75rem;">
+                    <td class="mono" style="color:var(--text-muted);font-size:.73rem;">
                         <?= htmlspecialchars($r['booking_ref']) ?>
                     </td>
                     <td>
                         <strong><?= htmlspecialchars($r['vehicle']) ?></strong>
-                        <span style="color:var(--text-muted,#888);font-size:.75rem;"> (<?= $r['car_year'] ?>)</span>
+                        <span style="color:var(--text-muted);font-size:.73rem;"> (<?= $r['car_year'] ?>)</span>
                     </td>
                     <td><?= date('M d, Y', strtotime($r['pickup'])) ?></td>
                     <td><?= date('M d, Y', strtotime($r['return'])) ?></td>
@@ -463,7 +464,7 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
             </table>
             </div>
             <?php endif; ?>
-        </div>
+        </div><!-- /tab history -->
 
         <!-- ════ TAB: PROFILE ════════════════════════════════ -->
         <div class="tab-panel <?= $tab === 'profile' ? 'active' : '' ?>">
@@ -516,8 +517,8 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                                    value="<?= htmlspecialchars($client['adress'] ?? '') ?>">
                         </div>
                     </div>
-                    <div style="margin-top:1.2rem;display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:.72rem;color:var(--text-muted,#888);">
+                    <div style="margin-top:1.2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;">
+                        <span style="font-size:.72rem;color:var(--text-muted);">
                             Member since <?= date('F j, Y', strtotime($client['client_dateAdded'])) ?>
                         </span>
                         <button type="submit" class="btn btn-red btn-sm">Save Changes</button>
@@ -532,15 +533,18 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                     <div class="profile-grid">
                         <div class="form-group-d" style="grid-column:1/-1;">
                             <label class="form-label-d">Current Password</label>
-                            <input class="form-input-d" type="password" name="current_password" required placeholder="Enter current password">
+                            <input class="form-input-d" type="password" name="current_password"
+                                   required placeholder="Enter current password">
                         </div>
                         <div class="form-group-d">
                             <label class="form-label-d">New Password</label>
-                            <input class="form-input-d" type="password" name="new_password" required placeholder="Min. 8 characters">
+                            <input class="form-input-d" type="password" name="new_password"
+                                   required placeholder="Min. 8 characters">
                         </div>
                         <div class="form-group-d">
                             <label class="form-label-d">Confirm New Password</label>
-                            <input class="form-input-d" type="password" name="confirm_password" required placeholder="Repeat new password">
+                            <input class="form-input-d" type="password" name="confirm_password"
+                                   required placeholder="Repeat new password">
                         </div>
                     </div>
                     <div style="margin-top:1.2rem;text-align:right;">
@@ -554,11 +558,13 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                 <h3>Account Details</h3>
                 <div class="detail-row">
                     <span class="detail-key">Account ID</span>
-                    <span class="detail-val" style="color:var(--text-muted,#888);">#<?= $uid ?></span>
+                    <span class="detail-val" style="color:var(--text-muted);">#<?= $uid ?></span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-key">Role</span>
-                    <span class="detail-val"><span class="badge badge-confirmed"><?= ucfirst($client['role']) ?></span></span>
+                    <span class="detail-val">
+                        <span class="badge badge-confirmed"><?= ucfirst($client['role']) ?></span>
+                    </span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-key">Member Since</span>
@@ -574,7 +580,7 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
                 </div>
             </div>
 
-        </div><!-- /profile tab -->
+        </div><!-- /tab profile -->
 
     </div><!-- /main panel -->
 </div><!-- /dash-wrap -->
@@ -585,7 +591,7 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
 <div class="modal-bg" id="detail-modal">
   <div class="modal-box">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;">
-      <div class="modal-title" id="dm-title">Rental Details</div>
+      <div class="modal-title">Rental Details</div>
       <button class="modal-close" onclick="closeDetail()">✕</button>
     </div>
     <div id="dm-body"></div>
@@ -600,9 +606,9 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
   <div class="modal-box" style="max-width:380px;text-align:center;padding:2rem;">
     <div style="font-size:2.5rem;margin-bottom:.8rem;">🚫</div>
     <div class="modal-title">Cancel Booking?</div>
-    <p style="font-size:.83rem;color:var(--text-muted,#888);margin-bottom:1.5rem;">
-      Are you sure you want to cancel the rental for <strong id="cancel-veh"></strong>?
-      This cannot be undone.
+    <p style="font-size:.83rem;color:var(--text-muted);margin-bottom:1.5rem;">
+      Are you sure you want to cancel the rental for
+      <strong id="cancel-veh"></strong>? This cannot be undone.
     </p>
     <form method="POST" action="<?= BASE_URL ?>?page=dashboard&action=cancel-rental">
       <input type="hidden" name="rental_id" id="cancel-rid">
@@ -617,80 +623,79 @@ $fname = htmlspecialchars($client['clnt_fname'] ?? 'Client');
 <script>
 // ── Detail Modal ─────────────────────────────────────────────
 function openDetail(r) {
-  var pm = (r.payment_method || '').toUpperCase();
-  var driver = r.driver_name || 'Self-Drive';
-  var pickup  = r.pickup  ? formatDT(r.pickup)  : '—';
-  var ret     = r.return  ? formatDT(r.return)  : '—';
-  var created = r.date_created ? formatDT(r.date_created) : '—';
+    var driver  = r.driver_name || 'Self-Drive';
+    var pickup  = r.pickup       ? formatDT(r.pickup)       : '—';
+    var ret     = r['return']    ? formatDT(r['return'])    : '—';
+    var created = r.date_created ? formatDT(r.date_created) : '—';
 
-  var rows = [
-    ['Booking Ref',    r.booking_ref || '—'],
-    ['Vehicle',        (r.vehicle || '—') + ' (' + (r.car_year || '') + ')'],
-    ['Plate Number',   r.plate_number || '—'],
-    ['Pickup Date',    pickup],
-    ['Return Date',    ret],
-    ['Pickup Branch',  r.pickup_address || '—'],
-    ['Destination',    r.dest_address   || '—'],
-    ['Distance',       r.distance_km ? r.distance_km + ' km' : '—'],
-    ['Duration',       (r.total_days || 1) + ' day' + (r.total_days > 1 ? 's' : '')],
-    ['Driver',         driver],
-    ['Payment Method', pm],
-    ['Status',         '<span class="badge badge-' + (r.status||'') + '">' + ucf(r.status) + '</span>'],
-    ['Total Amount',   '₱' + fmt(r.amount)],
-    ['Booked On',      created],
-  ];
+    var rows = [
+        ['Booking Ref',    r.booking_ref   || '—'],
+        ['Vehicle',        (r.vehicle||'—') + ' (' + (r.car_year||'') + ')'],
+        ['Plate Number',   r.plate_number  || '—'],
+        ['Pickup Date',    pickup],
+        ['Return Date',    ret],
+        ['Pickup Branch',  r.pickup_address || '—'],
+        ['Destination',    r.dest_address   || '—'],
+        ['Distance',       r.distance_km ? r.distance_km + ' km' : '—'],
+        ['Duration',       (r.total_days||1) + ' day' + (r.total_days > 1 ? 's' : '')],
+        ['Driver',         driver],
+        ['Payment',        (r.payment_method||'').toUpperCase()],
+        ['Status',         '<span class="badge badge-'+(r.status||'')+'">'+ucf(r.status)+'</span>'],
+        ['Total',          '₱' + fmt(r.amount)],
+        ['Booked On',      created],
+    ];
+    if (r.notes) rows.push(['Notes', r.notes]);
 
-  if (r.notes) rows.push(['Notes', r.notes]);
+    var miniMap = '';
+    if (r.dest_lat && r.dest_lon) {
+        miniMap = '<div id="mini-map" style="height:160px;margin-top:1rem;border:1px solid var(--border);border-radius:4px;overflow:hidden;"></div>';
+    }
 
-  // Mini map if coordinates available
-  var miniMap = '';
-  if (r.dest_lat && r.dest_lon) {
-    miniMap = '<div id="mini-map" style="height:160px;margin-top:1rem;border:1px solid rgba(255,255,255,.08);"></div>';
-  }
+    document.getElementById('dm-body').innerHTML =
+        rows.map(function(row) {
+            return '<div class="detail-row"><span class="detail-key">' + row[0] +
+                   '</span><span class="detail-val">' + row[1] + '</span></div>';
+        }).join('') + miniMap;
 
-  var html = rows.map(function(row) {
-    return '<div class="detail-row"><span class="detail-key">' + row[0] +
-           '</span><span class="detail-val">' + row[1] + '</span></div>';
-  }).join('') + miniMap;
+    document.getElementById('detail-modal').classList.add('open');
 
-  document.getElementById('dm-body').innerHTML = html;
-  document.getElementById('detail-modal').classList.add('open');
-
-  // Render mini map after DOM insertion
-  if (r.dest_lat && r.dest_lon && typeof L !== 'undefined') {
-    setTimeout(function() {
-      var mm = L.map('mini-map', { zoomControl:false, attributionControl:false });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mm);
-      var destLatLng = [parseFloat(r.dest_lat), parseFloat(r.dest_lon)];
-      L.marker(destLatLng).addTo(mm).bindPopup('📍 Destination').openPopup();
-      mm.setView(destLatLng, 13);
-    }, 100);
-  }
+    if (r.dest_lat && r.dest_lon && typeof L !== 'undefined') {
+        setTimeout(function() {
+            var mm = L.map('mini-map', { zoomControl: false, attributionControl: false });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mm);
+            var ll = [parseFloat(r.dest_lat), parseFloat(r.dest_lon)];
+            L.marker(ll).addTo(mm).bindPopup('📍 Destination').openPopup();
+            mm.setView(ll, 13);
+        }, 100);
+    }
 }
 function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
 
 // ── Cancel Modal ──────────────────────────────────────────────
 function openCancel(rid, veh) {
-  document.getElementById('cancel-rid').value = rid;
-  document.getElementById('cancel-veh').textContent = veh;
-  document.getElementById('cancel-modal').classList.add('open');
+    document.getElementById('cancel-rid').value  = rid;
+    document.getElementById('cancel-veh').textContent = veh;
+    document.getElementById('cancel-modal').classList.add('open');
 }
 function closeCancel() { document.getElementById('cancel-modal').classList.remove('open'); }
 
 // Close on backdrop click
-document.getElementById('detail-modal').addEventListener('click', function(e){ if(e.target===this) closeDetail(); });
-document.getElementById('cancel-modal').addEventListener('click', function(e){ if(e.target===this) closeCancel(); });
+['detail-modal','cancel-modal'].forEach(function(id) {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('open');
+    });
+});
 
 // ── Helpers ───────────────────────────────────────────────────
 function fmt(n) {
-  return parseFloat(n || 0).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return parseFloat(n || 0).toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function ucf(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 function formatDT(s) {
-  if (!s) return '—';
-  var d = new Date(s.replace(' ', 'T'));
-  if (isNaN(d)) return s;
-  return d.toLocaleDateString('en-PH', {month:'short',day:'numeric',year:'numeric'}) +
-         ' ' + d.toLocaleTimeString('en-PH', {hour:'numeric',minute:'2-digit'});
+    if (!s) return '—';
+    var d = new Date(s.replace(' ', 'T'));
+    if (isNaN(d)) return s;
+    return d.toLocaleDateString('en-PH', {month:'short', day:'numeric', year:'numeric'}) +
+           ' ' + d.toLocaleTimeString('en-PH', {hour:'numeric', minute:'2-digit'});
 }
 </script>

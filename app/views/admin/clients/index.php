@@ -6,7 +6,7 @@ $activePage = 'admin-clients';
 <div class="section-header">
     <h2 class="section-title"><i class="fas fa-users"></i> Registered Clients</h2>
 </div>
-
+<br><br>
 <div class="card">
     <table class="data-table">
         <thead>

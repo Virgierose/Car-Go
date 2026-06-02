@@ -1,11 +1,8 @@
 <?php ?>
 
- <link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/about.css">
+<link rel="stylesheet" href="<?= ASSET_URL ?>assets/css/about.css">
 
-<?php
-// Tell the header to render as solid (not transparent)
-$solidHeader = true;
-?>
+<?php $solidHeader = true; ?>
 
 <!-- ── HERO ─────────────────────────────────────── -->
 <div class="about-hero">
@@ -13,9 +10,7 @@ $solidHeader = true;
   <div class="hero-inner">
     <div class="label-tag">Who We Are</div>
     <h1 class="hero-h1">About <span class="red">Us</span></h1>
-    <p class="hero-sub">
-     <br>
-    </p>
+    <p class="hero-sub"><br></p>
   </div>
 </div>
 
@@ -29,8 +24,14 @@ $solidHeader = true;
       <p>Our fleet includes Sedans, SUVs, Vans, and Pickups. We ensure comfort, reliability, and affordability in every ride.</p>
     </div>
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-num">500+</div><div class="stat-label">Happy Clients</div></div>
-      <div class="stat-box"><div class="stat-num">50+</div><div class="stat-label">Fleet Vehicles</div></div>
+      <div class="stat-box">
+        <div class="stat-num"><?= $clientCount > 0 ? $clientCount . '+' : '—' ?></div>
+        <div class="stat-label">Happy Clients</div>
+      </div>
+     <div class="stat-box">
+  <div class="stat-num"><?= $carCount > 0 ? $carCount . '+' : '—' ?></div>
+  <div class="stat-label">Fleet Vehicles</div>
+</div>
       <div class="stat-box"><div class="stat-num">5★</div><div class="stat-label">Average Rating</div></div>
       <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-label">Support</div></div>
     </div>
@@ -67,6 +68,92 @@ $solidHeader = true;
   </div>
 </section>
 
+<!-- ── DRIVERS ────────────────────────────────────── -->
+<section class="drivers-section" id="our-drivers">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-tag">Our Team</div>
+        <h2>Meet Our <span class="red">Drivers</span></h2>
+      </div>
+      <p>Professional, licensed, and ready to take you anywhere safely.</p>
+    </div>
+
+    <?php if (!empty($drivers)): ?>
+    <div class="drivers-grid">
+      <?php foreach ($drivers as $d): ?>
+      <?php
+        // Driver::available() returns aliased columns: name, fee, status
+        // plus raw columns now included in the updated query
+        $fullName = htmlspecialchars($d['name'] ?? 'Unknown Driver');
+        $initial  = strtoupper(substr($d['drvr_fname'] ?? $d['name'] ?? 'D', 0, 1));
+        $rate     = '₱' . number_format((float)($d['fee'] ?? 500), 0);
+        $license  = htmlspecialchars($d['drvr_license_no']   ?? '');
+        $phone    = htmlspecialchars($d['drvr_phone_number'] ?? '');
+        $status   = $d['status'] ?? 'available';
+      ?>
+      <div class="driver-card">
+        <div class="driver-card-inner">
+
+          <!-- Avatar -->
+          <div class="driver-avatar-wrap">
+            <div class="driver-avatar-initial"><?= $initial ?></div>
+            <?php if ($status === 'available'): ?>
+              <div class="driver-status-dot" title="Available"></div>
+            <?php endif; ?>
+          </div>
+
+          <!-- Name & rate -->
+          <div class="driver-info">
+            <h3 class="driver-name"><?= $fullName ?></h3>
+            <div class="driver-rate">
+              <span class="driver-rate-val"><?= $rate ?></span>
+              <span class="driver-rate-label">/day</span>
+            </div>
+          </div>
+
+          <!-- Detail rows -->
+          <div class="driver-details">
+            <?php if ($license): ?>
+            <div class="driver-detail-row">
+              <span class="detail-icon">🪪</span>
+              <span class="detail-text">License: <strong><?= $license ?></strong></span>
+            </div>
+            <?php endif; ?>
+            <?php if ($phone): ?>
+            <div class="driver-detail-row">
+              <span class="detail-icon">📞</span>
+              <span class="detail-text"><?= $phone ?></span>
+            </div>
+            <?php endif; ?>
+            <div class="driver-detail-row">
+              <span class="detail-icon">✅</span>
+              <span class="detail-text">Status: <strong><?= ucfirst($status) ?></strong></span>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <a href="<?= BASE_URL ?>?page=price-calculator" class="driver-book-btn">
+            Book with this Driver →
+          </a>
+
+        </div>
+      </div>
+      <?php endforeach; ?>
+    </div>
+
+    <?php else: ?>
+    <div class="drivers-empty">
+      <div class="drivers-empty-icon">🚗</div>
+      <h3>No Drivers Available Right Now</h3>
+      <p>Check back soon or proceed with our self-drive option.</p>
+      <a href="<?= BASE_URL ?>?page=price-calculator" class="btn btn-red">Browse Fleet →</a>
+    </div>
+    <?php endif; ?>
+
+  </div>
+</section>
+
 <!-- ── LOCATION ───────────────────────────────────── -->
 <section class="location-section">
   <div class="wrap">
@@ -85,7 +172,7 @@ $solidHeader = true;
         </div>
         <div class="loc-item">
           <div class="loc-icon">📞</div>
-          <div class="loc-info"><strong>Phone / WhatsApp</strong><span>+63 912 345 6789</span></div>
+          <div class="loc-info"><strong>Phone</strong><span>+63 912 345 6789</span></div>
         </div>
       </div>
     </div>

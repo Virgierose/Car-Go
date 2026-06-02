@@ -60,7 +60,9 @@ class MfaController
             if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $error = $_SESSION['mfa_error'] ?? null;
                 unset($_SESSION['mfa_error']);
-                render('auth/admin-mfa-otp', compact('client', 'error'));
+                // renderBare: skips header.php/footer.php so the site nav
+                // and footer never appear on this standalone page.
+                renderBare('auth/admin-mfa-otp', compact('client', 'error'));
                 return;
             }
 
@@ -72,7 +74,8 @@ class MfaController
                 $_SESSION['mfa_error'] = 'Invalid code. Please try again.';
                 $error = $_SESSION['mfa_error'];
                 unset($_SESSION['mfa_error']);
-                render('auth/admin-mfa-otp', compact('client', 'error'));
+                // renderBare: same reason — standalone page, no shared layout.
+                renderBare('auth/admin-mfa-otp', compact('client', 'error'));
             }
             return;
         }

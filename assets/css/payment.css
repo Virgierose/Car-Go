@@ -1,0 +1,321 @@
+/* ============================================================
+   booking/payment.css  —  Step 4: Payment
+   ============================================================ */
+
+/* ── Payment Method Grid ─────────────────────────────────── */
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .8rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.pay-opt {
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+
+.pay-opt:hover {
+  border-color: rgba(192, 57, 43, .3);
+}
+
+.pay-opt.selected {
+  border-color: var(--crimson);
+  background: rgba(192, 57, 43, .07);
+}
+
+.pay-opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pay-icon {
+  font-size: 1.6rem;
+  margin-bottom: .4rem;
+  display: block;
+}
+
+.pay-label {
+  font-size: .75rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-label);
+}
+
+.pay-opt.selected .pay-label {
+  color: var(--crimson-soft);
+}
+
+/* ── Card / Payment Fields ───────────────────────────────── */
+.card-fields {
+  display: none;
+}
+
+.card-fields.visible {
+  display: block;
+}
+
+/* ── Pay Grid (two-column layout) ────────────────────────── */
+.pay-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ── QR Modal ────────────────────────────────────────────── */
+#qr-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, .82);
+  backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem; /* prevents modal from touching screen edges on mobile */
+}
+
+#qr-modal.open {
+  display: flex;
+}
+
+.qr-box {
+  background: #111113;
+  border: 1px solid rgba(255, 255, 255, .08);
+  padding: 2rem 2.2rem 1.8rem;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: qrSlideIn .3s ease;
+}
+
+@keyframes qrSlideIn {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.qr-brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 1.2rem;
+}
+
+.qr-brand.gcash { color: #007DFF; }
+.qr-brand.maya  { color: #00C27B; }
+
+.qr-frame {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 1.2rem;
+  border: 3px solid rgba(255, 255, 255, .06);
+  padding: 10px;
+  background: #fff;
+  position: relative;
+}
+
+.qr-frame svg {
+  width: 100%;
+  height: 100%;
+}
+
+.qr-amount {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: .25rem;
+}
+
+.qr-ref {
+  font-size: .7rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .35);
+  margin-bottom: 1.4rem;
+}
+
+/* ── QR Scan Line Animation ──────────────────────────────── */
+.qr-scan-line {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(192, 57, 43, .9), transparent);
+  top: 10px;
+  animation: scanMove 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanMove {
+  0%   { top: 10px;  opacity: 1; }
+  90%  { top: 186px; opacity: 1; }
+  100% { top: 10px;  opacity: 0; }
+}
+
+/* ── QR Simulate Scan Button ─────────────────────────────── */
+.btn-simulate-scan {
+  width: 100%;
+  padding: .75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: rgba(255, 255, 255, .5);
+  font-size: .75rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: .8rem;
+  transition: all .2s;
+}
+
+.btn-simulate-scan:hover {
+  border-color: rgba(255, 255, 255, .3);
+  color: rgba(255, 255, 255, .8);
+}
+
+/* ── QR Success State ────────────────────────────────────── */
+.qr-success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0 .5rem;
+}
+
+.qr-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+.qr-success-icon.gcash { background: rgba(0, 125, 255, .15); border: 2px solid #007DFF; }
+.qr-success-icon.maya  { background: rgba(0, 194, 123, .15); border: 2px solid #00C27B; }
+
+.qr-success h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: .4rem;
+}
+
+.qr-success p {
+  font-size: .8rem;
+  color: rgba(255, 255, 255, .45);
+  margin-bottom: 1.2rem;
+}
+
+.btn-qr-confirm {
+  width: 100%;
+  padding: .85rem;
+  background: var(--crimson, #c0392b);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: opacity .2s;
+}
+
+.btn-qr-confirm:hover {
+  opacity: .85;
+}
+
+.qr-cancel {
+  display: block;
+  margin-top: .9rem;
+  font-size: .72rem;
+  color: rgba(255, 255, 255, .3);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: none;
+  border: none;
+}
+
+.qr-cancel:hover {
+  color: rgba(255, 255, 255, .6);
+}
+
+/* ============================================================
+   Responsive — Tablet  (≤ 900px)
+   ============================================================ */
+@media (max-width: 900px) {
+  .pay-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Responsive — Mobile  (≤ 600px)
+   ============================================================ */
+@media (max-width: 600px) {
+  /* Stack payment method tiles into 2 columns on small screens */
+  .payment-methods {
+    grid-template-columns: 1fr 1fr;
+    gap: .6rem;
+  }
+
+  .pay-opt {
+    padding: .75rem .5rem;
+  }
+
+  .pay-icon {
+    font-size: 1.3rem;
+    margin-bottom: .25rem;
+  }
+
+  .pay-label {
+    font-size: .7rem;
+  }
+
+  /* QR modal: tighter padding on small screens */
+  .qr-box {
+    padding: 1.5rem 1.2rem 1.4rem;
+  }
+
+  .qr-frame {
+    width: 160px;
+    height: 160px;
+  }
+
+  .qr-amount {
+    font-size: 1.6rem;
+  }
+}
+
+/* ============================================================
+   Responsive — Very small  (≤ 380px)
+   ============================================================ */
+@media (max-width: 380px) {
+  .payment-methods {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pay-opt {
+    padding: .6rem .4rem;
+  }
+}

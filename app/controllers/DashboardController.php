@@ -14,7 +14,8 @@ class DashboardController {
     public function index(): void {
         $this->requireClient();
         
-        $bookings = Booking::forClient();
+        $clientId = (int) $_SESSION['client_id'];
+        $bookings = Booking::forClient($clientId);
         $stats    = Booking::stats();
 
         render('dashboard/index', [

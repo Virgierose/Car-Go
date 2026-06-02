@@ -66,7 +66,7 @@ $router->post('/admin/messages/delete', 'AdminController', 'messageDelete');
 $router->post('/admin/messages/reply',  'AdminController', 'messageReply');
 
 //Admin Clients
-'admin-clients' => ['AdminController', 'clients'],
+'admin-clients-status' => ['AdminController', 'clients'],
 'admin-bookings-status' => [$adminController, 'bookingStatus'],
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTE: After successful login + MFA verification, users are redirected based

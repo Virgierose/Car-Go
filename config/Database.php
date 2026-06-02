@@ -1,6 +1,5 @@
 <?php
 
-// Guard against double-inclusion (e.g. if any file still requires this directly)
 if (class_exists('Database', false)) {
     return;
 }
@@ -10,7 +9,7 @@ class Database {
     private static ?Database $instance = null;
     private mysqli $connection;
 
-    private string $host     = 'auth-db1515.hstgr.io';
+    private string $host     = 'localhost';
     private string $username = 'u970217706_cargo';
     private string $password = 'gmp_Cargo3';
     private string $database = 'u970217706_cargo';
@@ -33,26 +32,17 @@ class Database {
             $code = $e->getCode();
 
             $messages = [
-                1045 => "Access denied — wrong username or password for MySQL root user.",
-                1049 => "Database 'cargo_db' does not exist — please import cargo_db.sql first.",
-                2002 => "Cannot connect to MySQL — make sure MySQL is running in XAMPP Control Panel.",
+                1045 => "Access denied — wrong username or password.",
+                1049 => "Database does not exist.",
+                2002 => "Cannot connect to MySQL server.",
             ];
 
             $friendly = $messages[$code] ?? 'DB Error [' . $code . ']: ' . $e->getMessage();
             error_log('Database connection failed: ' . $e->getMessage());
 
-            die('
-                <div style="font-family:monospace;background:#1e1e1e;color:#f48771;
-                            padding:2rem;margin:2rem;border-left:4px solid #f48771;">
-                    <strong>Database Connection Failed</strong><br><br>
-                    ' . htmlspecialchars($friendly) . '<br><br>
-                    <span style="color:#9cdcfe;">Checklist:</span><br>
-                    &nbsp;1. XAMPP → MySQL is <strong>Running</strong> (green)<br>
-                    &nbsp;2. Database name is exactly <strong>cargo_db</strong> in phpMyAdmin<br>
-                    &nbsp;3. Username is <strong>root</strong>, password is <strong>empty</strong> (XAMPP default)<br>
-                    &nbsp;4. You imported <strong>cargo_db.sql</strong> via phpMyAdmin → Import
-                </div>
-            ');
+            die('<div style="font-family:monospace;background:#1e1e1e;color:#f48771;padding:2rem;margin:2rem;border-left:4px solid #f48771;">
+                <strong>Database Connection Failed</strong><br><br>' . htmlspecialchars($friendly) . '
+            </div>');
         }
     }
 
