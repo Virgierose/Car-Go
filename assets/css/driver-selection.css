@@ -2,213 +2,318 @@
    booking/driver-selection.css  —  Step 2: Driver Selection
    ============================================================ */
 
+/* ── Section Label ───────────────────────────────────────── */
+.ds-section-label {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-muted, #888);
+  margin: 0 0 .9rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ds-section-label::before,
+.ds-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border, #2a2a2a);
+}
+
+/* ── Self-Drive Row ──────────────────────────────────────── */
+.selfdriven-opt {
+  display: flex;
+  flex-direction: row;       /* never let this become column */
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 10px;
+  background: var(--bg-input, #111);
+  padding: 1.1rem 1.3rem;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+  margin-bottom: 1.8rem;
+  position: relative;
+}
+.selfdriven-opt:hover {
+  border-color: rgba(192,57,43,.4);
+  background: rgba(192,57,43,.04);
+}
+.selfdriven-opt.selected {
+  border-color: var(--crimson, #c0392b);
+  background: rgba(192,57,43,.07);
+  box-shadow: 0 0 0 3px rgba(192,57,43,.1);
+}
+
+/* Hide native radio */
+.selfdriven-opt input[type="radio"] { display: none; }
+
+/* Emoji circle */
+.selfdriven-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border, #2a2a2a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  transition: background .2s, border-color .2s;
+  line-height: 1;
+}
+.selfdriven-opt.selected .selfdriven-icon {
+  background: rgba(192,57,43,.12);
+  border-color: rgba(192,57,43,.4);
+}
+
+/* Text */
+.selfdriven-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.selfdriven-text strong {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-primary, #fff);
+  line-height: 1.2;
+}
+.selfdriven-text span {
+  display: block;
+  font-size: .78rem;
+  color: var(--text-muted, #888);
+  line-height: 1.4;
+}
+
+/* Price pill */
+.selfdriven-price {
+  flex-shrink: 0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted, #888);
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 6px;
+  padding: .3rem .8rem;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.selfdriven-opt.selected .selfdriven-price {
+  color: #27ae60;
+  background: rgba(39,174,96,.1);
+  border-color: rgba(39,174,96,.25);
+}
+
+/* Check bubble */
+.selfdriven-check {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--crimson, #c0392b);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: .65rem;
+  font-weight: 700;
+  color: #fff;
+}
+.selfdriven-opt.selected .selfdriven-check { display: flex; }
+
 /* ── Driver Grid ─────────────────────────────────────────── */
 .driver-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .9rem;
+  margin-bottom: 1.8rem;
 }
 
 /* ── Driver Card ─────────────────────────────────────────── */
 .driver-card {
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  padding: 1.5rem 1rem;
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 10px;
+  background: var(--bg-input, #111);
+  padding: 1.4rem 1rem 1.2rem;
   text-align: center;
   cursor: pointer;
-  transition: all .25s;
+  transition: border-color .2s, background .2s, box-shadow .2s, transform .2s;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
 }
-
 .driver-card:hover {
-  border-color: rgba(192, 57, 43, 0.3);
-  background: rgba(192, 57, 43, 0.04);
+  border-color: rgba(192,57,43,.4);
+  background: rgba(192,57,43,.04);
+  transform: translateY(-2px);
 }
-
 .driver-card.selected {
-  border-color: var(--crimson);
-  background: rgba(192, 57, 43, 0.07);
-  box-shadow: 0 0 16px var(--crimson-glow);
+  border-color: var(--crimson, #c0392b);
+  background: rgba(192,57,43,.07);
+  box-shadow: 0 0 0 3px rgba(192,57,43,.1);
 }
 
-.driver-card input[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
+/* Hide native radio */
+.driver-card input[type="radio"] { display: none; }
 
-/* ── Driver Avatar ───────────────────────────────────────── */
-.driver-avatar {
-  width: 64px;
-  height: 64px;
+/* Avatar */
+.driver-card .driver-avatar {
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: var(--bg-card);
-  border: 2px solid var(--border);
-  margin: 0 auto .8rem;
+  background: rgba(255,255,255,.06);
+  border: 2px solid var(--border, #2a2a2a);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  color: var(--crimson-soft);
+  color: var(--crimson-soft, #e05252);
   overflow: hidden;
+  flex-shrink: 0;
+  margin-bottom: .3rem;
+  transition: border-color .2s;
 }
-
-.driver-avatar img {
+.driver-card.selected .driver-avatar { border-color: var(--crimson, #c0392b); }
+.driver-card .driver-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* Name */
 .driver-name {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1rem;
+  font-size: .95rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;
-  color: var(--text-primary);
+  color: var(--text-primary, #fff);
+  line-height: 1.2;
 }
 
+/* Rate badge */
 .driver-badge {
-  font-size: .68rem;
-  color: var(--text-muted);
-  letter-spacing: .08em;
-  margin-top: .2rem;
+  font-size: .72rem;
+  color: var(--text-muted, #888);
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border, #2a2a2a);
+  border-radius: 20px;
+  padding: .2rem .65rem;
+  margin-top: .1rem;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.driver-card.selected .driver-badge {
+  background: rgba(192,57,43,.1);
+  border-color: rgba(192,57,43,.3);
+  color: #e05252;
 }
 
-/* ── Selected Check Mark ─────────────────────────────────── */
+/* Checkmark bubble (top-right) */
 .driver-check {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: var(--crimson);
+  background: var(--crimson, #c0392b);
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: .6rem;
+  font-size: .65rem;
+  font-weight: 700;
   color: #fff;
 }
+.driver-card.selected .driver-check { display: flex; }
 
-.driver-card.selected .driver-check {
-  display: flex;
+/* ── No drivers state ────────────────────────────────────── */
+.no-drivers {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border: 1px dashed var(--border, #2a2a2a);
+  border-radius: 10px;
+  color: var(--text-muted, #888);
+  font-size: .85rem;
+  line-height: 1.7;
+  margin-bottom: 1.8rem;
 }
-
-/* ── Self-Drive Option ───────────────────────────────────── */
-.selfdriven-opt {
-  border: 1px dashed var(--border);
-  background: transparent;
-  padding: 1.2rem 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: all .25s;
-  margin-bottom: 1.5rem;
-  position: relative;
-}
-
-.selfdriven-opt:hover {
-  border-color: rgba(192, 57, 43, 0.3);
-}
-
-.selfdriven-opt.selected {
-  border-color: var(--crimson);
-  background: rgba(192, 57, 43, 0.05);
-}
-
-.selfdriven-opt input[type="radio"] {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.selfdriven-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.selfdriven-text {
-  flex: 1;
-}
-
-.selfdriven-text strong {
+.no-drivers-icon {
+  font-size: 2rem;
+  opacity: .4;
   display: block;
-  font-family: 'Barlow Condensed', sans-serif;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-size: .95rem;
+  margin-bottom: .6rem;
 }
 
-.selfdriven-text span {
-  font-size: .75rem;
-  color: var(--text-muted);
-}
-
-.selfdriven-price {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
+/* ── Overflow fixes ──────────────────────────────────────── */
+.flow-card,
+.driver-card,
+.selfdriven-opt { overflow: visible !important; }
 
 /* ============================================================
-   Responsive — Tablet  (≤ 860px)
+   Responsive — Tablet (≤ 860px)
    ============================================================ */
 @media (max-width: 860px) {
   .driver-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   }
 }
 
 /* ============================================================
-   Responsive — Mobile  (≤ 600px)
+   Responsive — Mobile (≤ 600px)
    ============================================================ */
 @media (max-width: 600px) {
   .driver-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: .75rem;
+    gap: .7rem;
   }
+  .driver-card { padding: 1.2rem .75rem 1rem; }
+  .driver-card .driver-avatar { width: 54px; height: 54px; font-size: 1.3rem; }
+  .driver-name { font-size: .85rem; }
 
-  .driver-card {
-    padding: 1.1rem .75rem;
-  }
-
-  .driver-avatar {
-    width: 52px;
-    height: 52px;
-    font-size: 1.1rem;
-  }
-
-  .driver-name {
-    font-size: .85rem;
-  }
-
-  /* Self-drive: tighter layout on mobile */
-  .selfdriven-opt {
-    padding: 1rem;
-    gap: .75rem;
-  }
-
-  .selfdriven-price {
-    font-size: .95rem;
-  }
+  .selfdriven-opt { padding: 1rem; gap: .75rem; }
+  .selfdriven-icon { width: 42px; height: 42px; font-size: 1.2rem; }
+  .selfdriven-text strong { font-size: .92rem; }
+  .selfdriven-text span   { font-size: .74rem; }
+  .selfdriven-price       { font-size: .85rem; padding: .25rem .65rem; }
 }
 
 /* ============================================================
-   Responsive — Very small  (≤ 380px)
+   Responsive — Very small (≤ 380px)
    ============================================================ */
 @media (max-width: 380px) {
-  .driver-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: .5rem;
-  }
+  .driver-grid { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+  .driver-card { padding: 1rem .5rem .9rem; }
+  .driver-card .driver-avatar { width: 46px; height: 46px; font-size: 1.1rem; }
 
-  .driver-card {
-    padding: .9rem .5rem;
-  }
+  /* Wrap price under text on tiny screens */
+  .selfdriven-opt { flex-wrap: wrap; }
+  .selfdriven-price { width: 100%; text-align: right; }
+}
+
+/* ── Click passthrough fix ───────────────────────────────── */
+/* Prevent child elements from eating clicks meant for the card */
+.selfdriven-opt > *,
+.driver-card > * {
+  pointer-events: none;
+}
+/* But keep the hidden radio functional */
+.selfdriven-opt input[type="radio"],
+.driver-card input[type="radio"] {
+  pointer-events: none;
+  display: none;
 }

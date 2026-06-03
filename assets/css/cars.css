@@ -1,6 +1,6 @@
 /* ============================================================
    admin/cars/cars.css  —  shared by index, edit, create
-   Matches the Drivers page design language
+   Redesigned to match Bookings page design language
    ============================================================ */
 
 /* ── Page Header ─────────────────────────────────────────── */
@@ -30,6 +30,63 @@
   letter-spacing: .1em;
   text-transform: uppercase;
   margin: 0;
+}
+
+/* ── Status Tab Bar (matches Bookings ALL / PENDING / etc.) ── */
+.status-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.status-tabs::-webkit-scrollbar { display: none; }
+
+.status-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 20px;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--silver);
+  text-decoration: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+  transition: color .2s, border-color .2s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: 'Barlow', sans-serif;
+}
+
+.status-tab:hover { color: var(--white); }
+
+.status-tab.active {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+.tab-count {
+  background: rgba(255,255,255,.08);
+  color: var(--silver);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: .68rem;
+  font-weight: 700;
+}
+
+.status-tab.active .tab-count {
+  background: rgba(192,17,31,.15);
+  color: var(--red);
 }
 
 /* ── Filter Bar ──────────────────────────────────────────── */
@@ -107,6 +164,13 @@
 
 .filter-select option { background: var(--black-card); }
 
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 /* ── Shared Buttons ──────────────────────────────────────── */
 .btn {
   display: inline-flex;
@@ -151,6 +215,24 @@
 }
 
 .btn-ghost:hover { color: var(--white); border-color: var(--silver); }
+
+/* Reset link styled like Bookings page */
+.btn-reset {
+  background: transparent;
+  color: var(--silver);
+  border: none;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Barlow', sans-serif;
+  padding: 10px 4px;
+  text-decoration: none;
+  transition: color .2s;
+}
+
+.btn-reset:hover { color: var(--white); }
 
 /* ── Table Card ──────────────────────────────────────────── */
 .card {
@@ -250,7 +332,7 @@ tbody td {
 .badge {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: .7rem;
   font-weight: 700;
   letter-spacing: .1em;
@@ -259,21 +341,24 @@ tbody td {
 }
 
 .badge-available {
-  background: rgba(39,174,96,.15);
+  background: transparent;
   color: #27ae60;
-  border: 1px solid rgba(39,174,96,.3);
+  border: none;
+  font-weight: 800;
 }
 
 .badge-rented {
-  background: rgba(241,196,15,.15);
+  background: transparent;
   color: #f1c40f;
-  border: 1px solid rgba(241,196,15,.3);
+  border: none;
+  font-weight: 800;
 }
 
 .badge-maintenance {
-  background: rgba(231,76,60,.15);
+  background: transparent;
   color: #e74c3c;
-  border: 1px solid rgba(231,76,60,.3);
+  border: none;
+  font-weight: 800;
 }
 
 /* ── Action Buttons ──────────────────────────────────────── */
@@ -299,8 +384,15 @@ tbody td {
   color: var(--silver);
 }
 
-.btn-edit:hover  { background: var(--red); color: var(--white); border-color: var(--red); }
-.btn-delete:hover { background: #c0392b; color: var(--white); border-color: #c0392b; }
+/* Bookings page uses a single clean edit icon — match that */
+.btn-edit  {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--silver);
+}
+
+.btn-edit:hover  { color: var(--white); border-color: var(--silver); }
+.btn-delete:hover { background: rgba(192,17,31,.12); color: #e74c3c; border-color: rgba(192,17,31,.3); }
 
 .empty-row {
   text-align: center;
@@ -316,7 +408,6 @@ tbody td {
   overflow: hidden;
 }
 
-/* Card top header bar (like "DRIVER REGISTRY") */
 .form-card-header {
   display: flex;
   align-items: center;
@@ -507,7 +598,7 @@ tbody td {
 
 .alert ul { margin: 4px 0 0; padding-left: 18px; }
 
-/* ── Driver-style avatar cell (for driver table) ─────────── */
+/* ── Driver-style avatar cell ────────────────────────────── */
 .driver-avatar {
   width: 36px;
   height: 36px;
@@ -542,8 +633,7 @@ tbody td {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 
-  table th:nth-child(6),
-  table td:nth-child(6),
+  /* Hide less critical columns on tablet */
   table th:nth-child(7),
   table td:nth-child(7),
   table th:nth-child(8),
@@ -557,6 +647,16 @@ tbody td {
   .page-header { flex-direction: column; align-items: flex-start; }
   .page-header .btn-primary { width: 100%; justify-content: center; }
 
+  /* Tabs scroll horizontally on mobile */
+  .status-tabs {
+    margin-left: -16px;
+    margin-right: -16px;
+    padding: 0 16px;
+    border-bottom-color: var(--border);
+  }
+
+  .status-tab { padding: 10px 14px; }
+
   .form-card-body { padding: 16px 14px; }
   .form-actions   { padding: 14px 16px; flex-direction: column-reverse; }
   .form-actions .btn { width: 100%; justify-content: center; }
@@ -568,28 +668,36 @@ tbody td {
     gap: 12px;
   }
 
+  /* Stack filter as full-width column */
   .filter-form {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
   }
 
   .filter-group { min-width: 0; flex: unset; }
-
-  .filter-input,
+ /* .filter-input,*/
   .filter-select { width: 100%; }
 
-  .filter-bar .btn { flex: 1; justify-content: center; }
+  .filter-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
 
-  table th:nth-child(4),
-  table td:nth-child(4),
+  .filter-actions .btn { flex: 1; justify-content: center; }
+  .filter-actions .btn-reset { flex: 0; }
+
+  /* Hide extra columns on mobile */
   table th:nth-child(5),
   table td:nth-child(5),
+  table th:nth-child(6),
+  table td:nth-child(6),
   table th:nth-child(9),
   table td:nth-child(9),
   table th:nth-child(10),
   table td:nth-child(10) { display: none; }
 
-  table { min-width: 480px; }
+  table { min-width: 460px; }
 
   .upload-area { padding: 28px 14px; }
   .upload-icon { font-size: 1.8rem; }
@@ -607,4 +715,5 @@ tbody td {
     flex-direction: column;
     align-items: flex-start;
   }
+  .status-tab { padding: 10px 12px; font-size: .7rem; }
 }

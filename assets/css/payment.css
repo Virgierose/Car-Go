@@ -5,13 +5,14 @@
 /* ── Payment Method Grid ─────────────────────────────────── */
 .payment-methods {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: .8rem;
   margin: 1rem 0 1.5rem;
 }
 
 .pay-opt {
   border: 1px solid var(--border);
+  border-radius: 8px;
   background: var(--bg-input);
   padding: 1rem;
   text-align: center;
@@ -20,9 +21,7 @@
   position: relative;
 }
 
-.pay-opt:hover {
-  border-color: rgba(192, 57, 43, .3);
-}
+.pay-opt:hover { border-color: rgba(192, 57, 43, .3); }
 
 .pay-opt.selected {
   border-color: var(--crimson);
@@ -35,11 +34,7 @@
   pointer-events: none;
 }
 
-.pay-icon {
-  font-size: 1.6rem;
-  margin-bottom: .4rem;
-  display: block;
-}
+.pay-icon { font-size: 1.6rem; margin-bottom: .4rem; display: block; }
 
 .pay-label {
   font-size: .75rem;
@@ -48,24 +43,17 @@
   color: var(--text-label);
 }
 
-.pay-opt.selected .pay-label {
-  color: var(--crimson-soft);
-}
+.pay-opt.selected .pay-label { color: var(--crimson-soft); }
 
 /* ── Card / Payment Fields ───────────────────────────────── */
-.card-fields {
-  display: none;
-}
-
-.card-fields.visible {
-  display: block;
-}
+.card-fields { display: none; }
+.card-fields.visible { display: block; }
 
 /* ── Pay Grid (two-column layout) ────────────────────────── */
 .pay-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 2rem;
   align-items: start;
 }
 
@@ -75,26 +63,30 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, .82);
+  background: rgba(0,0,0,.85);
   backdrop-filter: blur(6px);
   align-items: center;
   justify-content: center;
-  padding: 1rem; /* prevents modal from touching screen edges on mobile */
+  padding: 1rem;
+  overflow-y: auto;
 }
 
-#qr-modal.open {
-  display: flex;
-}
+#qr-modal.open { display: flex; }
 
 .qr-box {
   background: #111113;
-  border: 1px solid rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
   padding: 2rem 2.2rem 1.8rem;
-  max-width: 360px;
+  max-width: 380px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   text-align: center;
   position: relative;
   animation: qrSlideIn .3s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 @keyframes qrSlideIn {
@@ -114,19 +106,28 @@
 .qr-brand.gcash { color: #007DFF; }
 .qr-brand.maya  { color: #00C27B; }
 
+/* ── QR Frame — hard-locked, SVG never escapes ───────────── */
 .qr-frame {
-  width: 200px;
-  height: 200px;
+  width: 180px;
+  height: 180px;
+  min-width: 180px;
+  min-height: 180px;
   margin: 0 auto 1.2rem;
-  border: 3px solid rgba(255, 255, 255, .06);
+  border: 3px solid rgba(255,255,255,.06);
   padding: 10px;
   background: #fff;
   position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .qr-frame svg {
-  width: 100%;
-  height: 100%;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 160px;
+  max-height: 160px;
 }
 
 .qr-amount {
@@ -141,17 +142,17 @@
   font-size: .7rem;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, .35);
-  margin-bottom: 1.4rem;
+  color: rgba(255,255,255,.35);
+  margin-bottom: 1rem;
 }
 
-/* ── QR Scan Line Animation ──────────────────────────────── */
+/* ── QR Scan Line ────────────────────────────────────────── */
 .qr-scan-line {
   position: absolute;
   left: 10px;
   right: 10px;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(192, 57, 43, .9), transparent);
+  background: linear-gradient(90deg, transparent, rgba(192,57,43,.9), transparent);
   top: 10px;
   animation: scanMove 2s linear infinite;
   pointer-events: none;
@@ -159,29 +160,94 @@
 
 @keyframes scanMove {
   0%   { top: 10px;  opacity: 1; }
-  90%  { top: 186px; opacity: 1; }
+  90%  { top: 148px; opacity: 1; }
   100% { top: 10px;  opacity: 0; }
 }
 
-/* ── QR Simulate Scan Button ─────────────────────────────── */
-.btn-simulate-scan {
-  width: 100%;
-  padding: .75rem;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, .12);
-  color: rgba(255, 255, 255, .5);
-  font-size: .75rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-bottom: .8rem;
-  transition: all .2s;
+/* ── Scanner Viewport ────────────────────────────────────── */
+.scanner-wrap {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 1rem;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,.1);
+  background: #000;
 }
 
-.btn-simulate-scan:hover {
-  border-color: rgba(255, 255, 255, .3);
-  color: rgba(255, 255, 255, .8);
+.scanner-wrap video,
+.scanner-wrap canvas,
+#qr-reader video,
+#qr-reader canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
 }
+
+#qr-reader__scan_region { border: none !important; }
+#qr-reader__dashboard   { display: none !important; }
+
+.scanner-hint {
+  font-size: .75rem;
+  color: rgba(255,255,255,.4);
+  margin-bottom: 1.2rem;
+  line-height: 1.6;
+}
+
+.scanner-corners {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scanner-corners::before,
+.scanner-corners::after,
+.sc-br, .sc-bl {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: var(--crimson, #c0392b);
+  border-style: solid;
+}
+
+.scanner-corners::before { top: 8px; left: 8px;   border-width: 3px 0 0 3px; }
+.scanner-corners::after  { top: 8px; right: 8px;  border-width: 3px 3px 0 0; }
+.sc-bl { bottom: 8px; left: 8px;  border-width: 0 0 3px 3px; }
+.sc-br { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; }
+
+/* ── Transaction Code ────────────────────────────────────── */
+.txn-code-wrap {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: .9rem 1rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.txn-code-label {
+  font-size: .65rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+  margin-bottom: .4rem;
+}
+
+.txn-code {
+  font-family: monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  color: #fff;
+}
+
+.txn-code.gcash { color: #007DFF; }
+.txn-code.maya  { color: #00C27B; }
 
 /* ── QR Success State ────────────────────────────────────── */
 .qr-success {
@@ -200,16 +266,11 @@
   justify-content: center;
   font-size: 2rem;
   margin-bottom: 1rem;
-  animation: popIn .4s cubic-bezier(.34, 1.56, .64, 1);
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
 }
 
-@keyframes popIn {
-  from { transform: scale(0); }
-  to   { transform: scale(1); }
-}
-
-.qr-success-icon.gcash { background: rgba(0, 125, 255, .15); border: 2px solid #007DFF; }
-.qr-success-icon.maya  { background: rgba(0, 194, 123, .15); border: 2px solid #00C27B; }
+.qr-success-icon.gcash { background: rgba(0,125,255,.15); border: 2px solid #007DFF; }
+.qr-success-icon.maya  { background: rgba(0,194,123,.15); border: 2px solid #00C27B; }
 
 .qr-success h3 {
   font-family: 'Barlow Condensed', sans-serif;
@@ -221,16 +282,17 @@
 
 .qr-success p {
   font-size: .8rem;
-  color: rgba(255, 255, 255, .45);
+  color: rgba(255,255,255,.45);
   margin-bottom: 1.2rem;
 }
 
 .btn-qr-confirm {
   width: 100%;
   padding: .85rem;
-  background: var(--crimson, #c0392b);
+  background: var(--crimson);
   color: #fff;
   border: none;
+  border-radius: 6px;
   cursor: pointer;
   font-family: 'Barlow Condensed', sans-serif;
   font-size: .9rem;
@@ -240,15 +302,13 @@
   transition: opacity .2s;
 }
 
-.btn-qr-confirm:hover {
-  opacity: .85;
-}
+.btn-qr-confirm:hover { opacity: .85; }
 
 .qr-cancel {
   display: block;
   margin-top: .9rem;
   font-size: .72rem;
-  color: rgba(255, 255, 255, .3);
+  color: rgba(255,255,255,.3);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -256,66 +316,85 @@
   border: none;
 }
 
-.qr-cancel:hover {
-  color: rgba(255, 255, 255, .6);
+.qr-cancel:hover { color: rgba(255,255,255,.6); }
+
+/* ── Spinner ─────────────────────────────────────────────── */
+.scanner-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  color: rgba(255,255,255,.4);
+  font-size: .8rem;
+  gap: .8rem;
 }
 
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: var(--crimson, #c0392b);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ============================================================
-   Responsive — Tablet  (≤ 900px)
+   Responsive — Tablet (≤ 900px)
    ============================================================ */
 @media (max-width: 900px) {
-  .pay-grid {
-    grid-template-columns: 1fr;
-  }
+  .pay-grid { grid-template-columns: 1fr; gap: 1.5rem; }
 }
 
 /* ============================================================
-   Responsive — Mobile  (≤ 600px)
+   Responsive — Mobile (≤ 600px)
    ============================================================ */
 @media (max-width: 600px) {
-  /* Stack payment method tiles into 2 columns on small screens */
+  .pay-grid { gap: 1.2rem; }
+
   .payment-methods {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: .6rem;
   }
 
-  .pay-opt {
-    padding: .75rem .5rem;
+  .pay-opt { padding: .75rem .5rem; }
+  .pay-icon { font-size: 1.3rem; margin-bottom: .25rem; }
+  .pay-label { font-size: .7rem; }
+
+  #qr-modal {
+    padding: .75rem;
+    align-items: flex-start;
+    padding-top: max(.75rem, env(safe-area-inset-top));
   }
 
-  .pay-icon {
-    font-size: 1.3rem;
-    margin-bottom: .25rem;
-  }
-
-  .pay-label {
-    font-size: .7rem;
-  }
-
-  /* QR modal: tighter padding on small screens */
   .qr-box {
-    padding: 1.5rem 1.2rem 1.4rem;
+    padding: 1.4rem 1rem 1.2rem;
+    max-width: 100%;
+    border-radius: 10px;
   }
 
   .qr-frame {
-    width: 160px;
-    height: 160px;
+    width: 150px;
+    height: 150px;
+    min-width: 150px;
+    min-height: 150px;
   }
 
-  .qr-amount {
-    font-size: 1.6rem;
-  }
+  .qr-frame svg { max-width: 130px; max-height: 130px; }
+
+  .qr-amount { font-size: 1.5rem; }
+
+  .scanner-wrap { width: 190px; height: 190px; }
 }
 
 /* ============================================================
-   Responsive — Very small  (≤ 380px)
+   Responsive — Very small (≤ 380px)
    ============================================================ */
 @media (max-width: 380px) {
-  .payment-methods {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .pay-opt {
-    padding: .6rem .4rem;
-  }
+  .payment-methods { grid-template-columns: repeat(2, 1fr); }
+  .pay-opt { padding: .6rem .4rem; }
+  .qr-frame { width: 130px; height: 130px; min-width: 130px; min-height: 130px; }
+  .scanner-wrap { width: 160px; height: 160px; }
 }

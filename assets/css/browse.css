@@ -18,7 +18,7 @@
   overflow: hidden;
   background:
     linear-gradient(to right, rgba(0,0,0,.82) 0%, rgba(0,0,0,.60) 100%),
-    url('<?= ASSET_URL ?>assets/img/carsB.png') center / 100% no-repeat;
+    url('https://cargo.bsit2c.site/assets/img/carsB.png') center / 100% no-repeat;
 }
 
 /* Radial red accent glows */

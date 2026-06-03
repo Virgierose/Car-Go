@@ -24,10 +24,16 @@
     <!-- Bottom stats bar -->
     <div class="hero-stats">
         <div class="hero-stats-inner">
-            <div class="hero-stat"><div class="hero-stat-num">50+</div><div class="hero-stat-label">Vehicles in Fleet</div></div>
-            <div class="hero-stat"><div class="hero-stat-num">5K+</div><div class="hero-stat-label">Happy Customers</div></div>
+            <div class="stat-box">
+               <div class="stat-num"><?= $clientCount > 0 ? $clientCount . '+' : '—' ?></div>
+               <div class="stat-label">Happy Clients</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num"><?= $carCount > 0 ? $carCount . '+' : '—' ?></div>
+                <div class="stat-label">Fleet Vehicles</div>
+            </div>
             <div class="hero-stat"><div class="hero-stat-num">7</div><div class="hero-stat-label">Years of Service</div></div>
-            <div class="hero-stat"><div class="hero-stat-num">4.9 ⭐</div><div class="hero-stat-label">Average Rating</div></div>
+            <div class="hero-stat"><div class="hero-stat-num">4.9 ★</div><div class="hero-stat-label">Average Rating</div></div>
         </div>
     </div>
 </section>

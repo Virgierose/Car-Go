@@ -32,7 +32,7 @@
   <div class="stat-num"><?= $carCount > 0 ? $carCount . '+' : '—' ?></div>
   <div class="stat-label">Fleet Vehicles</div>
 </div>
-      <div class="stat-box"><div class="stat-num">5★</div><div class="stat-label">Average Rating</div></div>
+      <div class="stat-box"><div class="stat-num">4.9★</div><div class="stat-label">Average Rating</div></div>
       <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-label">Support</div></div>
     </div>
   </div>

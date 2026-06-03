@@ -6,6 +6,7 @@
  * FIX: Cleaned up rental-card action block — no more duplicate
  *      Details/Cancel buttons. Payment button now correctly shows
  *      when rental_status = 'pending' AND docs_status = 'approved'.
+ * FIX: Car image onerror fallback to placeholder.
  */
 
 // ── GUARD ────────────────────────────────────────────────────
@@ -301,15 +302,19 @@ $t = $toastMap[$_GET['success']] ?? ['cls' => 'toast-success', 'msg' => '✅ Don
                     <!-- Car Image -->
                     <div>
                         <?php if (!empty($r['car_image'])): ?>
-                        <img src="<?= BASE_URL . htmlspecialchars($r['car_image']) ?>"
-                             alt="car" class="rental-car-img">
+                            <img
+                                src="<?= BASE_URL . htmlspecialchars($r['car_image']) ?>"
+                                alt="<?= htmlspecialchars($r['vehicle']) ?>"
+                                class="rental-car-img"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="rental-car-img-placeholder" style="display:none;">🚗</div>
                         <?php else: ?>
-                        <div class="rental-car-img-placeholder">🚗</div>
+                            <div class="rental-car-img-placeholder">🚗</div>
                         <?php endif; ?>
                     </div>
 
                     <!-- Info -->
-                    <div>
+                    <div class="rental-info">
                         <div class="rental-ref"><?= htmlspecialchars($r['booking_ref']) ?></div>
                         <div class="rental-veh">
                             <?= htmlspecialchars($r['vehicle']) ?>
@@ -332,7 +337,7 @@ $t = $toastMap[$_GET['success']] ?? ['cls' => 'toast-success', 'msg' => '✅ Don
                         STATUS LOGIC (mutually exclusive, clean):
                         1. docs_pending + rejected  → show rejection note + Cancel
                         2. docs_pending + pending   → show "under review" + Cancel
-                        3. pending + approved       → ✅ PAYMENT BUTTON (the fix)
+                        3. pending + approved       → ✅ PAYMENT BUTTON
                         4. confirmed                → Details + Cancel
                         5. anything else            → Details only
                     -->
@@ -366,7 +371,7 @@ $t = $toastMap[$_GET['success']] ?? ['cls' => 'toast-success', 'msg' => '✅ Don
                             </div>
 
                         <?php elseif ($status === 'pending' && $docs_status === 'approved'): ?>
-                            <!-- ✅ FIX: docs approved, awaiting payment -->
+                            <!-- docs approved, awaiting payment -->
                             <a href="<?= BASE_URL ?>?page=payment&rental_id=<?= (int)$r['rental_id'] ?>"
                                class="btn btn-red btn-sm">
                                 💳 Proceed to Payment
@@ -419,7 +424,7 @@ $t = $toastMap[$_GET['success']] ?? ['cls' => 'toast-success', 'msg' => '✅ Don
                 <p>No completed or cancelled rentals yet.</p>
             </div>
             <?php else: ?>
-            <div style="overflow-x:auto;">
+            <div class="hist-table-wrap">
             <table class="hist-table">
                 <thead>
                     <tr>
@@ -673,7 +678,7 @@ function closeDetail() { document.getElementById('detail-modal').classList.remov
 
 // ── Cancel Modal ──────────────────────────────────────────────
 function openCancel(rid, veh) {
-    document.getElementById('cancel-rid').value  = rid;
+    document.getElementById('cancel-rid').value       = rid;
     document.getElementById('cancel-veh').textContent = veh;
     document.getElementById('cancel-modal').classList.add('open');
 }

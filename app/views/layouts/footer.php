@@ -56,8 +56,18 @@
         <p>&copy; <?= date('Y') ?> <?= APP_NAME ?> Car Rentals. All rights reserved.</p>
     </div>
 </footer>
+
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/CARGO/assets/js/main.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL SLOT — direct child of <body>, outside ALL layout
+     wrappers. Pages inject modals via $GLOBALS['_body_modals'].
+     ═══════════════════════════════════════════════════════════ -->
+<?php if (!empty($GLOBALS['_body_modals'])): ?>
+    <?= $GLOBALS['_body_modals'] ?>
+<?php endif; ?>
+
 </body>
 </html>
